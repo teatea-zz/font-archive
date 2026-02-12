@@ -4,9 +4,11 @@ import FontCard from './FontCard';
 
 interface FontGridProps {
     fonts: Font[];
+    onViewDetail?: (font: Font) => void;
+    onToggleFavorite?: (fontId: string) => void;
 }
 
-export default function FontGrid({ fonts }: FontGridProps) {
+export default function FontGrid({ fonts, onViewDetail, onToggleFavorite }: FontGridProps) {
     if (fonts.length === 0) {
         return (
             <div className="text-center py-16">
@@ -37,7 +39,12 @@ export default function FontGrid({ fonts }: FontGridProps) {
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
             {fonts.map((font) => (
-                <FontCard key={font.id} font={font} />
+                <FontCard
+                    key={font.id}
+                    font={font}
+                    onViewDetail={onViewDetail}
+                    onToggleFavorite={onToggleFavorite}
+                />
             ))}
         </div>
     );

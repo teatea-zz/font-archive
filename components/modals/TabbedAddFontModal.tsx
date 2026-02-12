@@ -13,11 +13,13 @@ interface TabbedAddFontModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
+    editFont?: any | null; // Font 타입 (편집 모드)
 }
 
 type Tab = 'basic' | 'detail';
 
-export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: TabbedAddFontModalProps) {
+export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFont = null }: TabbedAddFontModalProps) {
+    const isEditMode = !!editFont;
     const [activeTab, setActiveTab] = useState<Tab>('basic');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -40,10 +42,38 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
     });
 
     const tags = watch('tags');
-    const imageUrls = watch('thumbnailUrl');
 
     // 이미지 배열을 위한 별도 상태
     const [images, setImages] = useState<string[]>([]);
+
+    // editFont가 변경되면 form 데이터 초기화
+    useEffect(() => {
+        if (editFont) {
+            // 모든 필드 값 설정
+            reset({
+                name: editFont.name || '',
+                designer: editFont.designer || '',
+                foundry: editFont.foundry || '',
+                downloadUrl: editFont.downloadUrl || '',
+                officialUrl: editFont.officialUrl || '',
+                category: editFont.category || 'gothic',
+                license: editFont.license || 'ofl',
+                tags: editFont.tags || [],
+                description: editFont.description || '',
+                usageNotes: editFont.usageNotes || '',
+            });
+            // 이미지도 설정
+            setImages(editFont.imageUrls || []);
+        } else {
+            // 추가 모드일 때는 초기화
+            reset({
+                tags: [],
+                category: 'gothic',
+                license: 'ofl',
+            });
+            setImages([]);
+        }
+    }, [editFont, reset]);
 
     // 탭 전환 시 스크롤을 맨 위로 리셋
     useEffect(() => {
@@ -73,8 +103,11 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                 thumbnail_url: images[0] || null, // 첫 번째 이미지를 썸네일로
             };
 
-            const response = await fetch('/api/fonts', {
-                method: 'POST',
+            const url = isEditMode ? `/api/fonts/${editFont.id}` : '/api/fonts';
+            const method = isEditMode ? 'PUT' : 'POST';
+
+            const response = await fetch(url, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -110,11 +143,23 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={handleClose} maxWidth="2xl">
-            <div className="flex flex-col max-h-[85vh]">
+        <Modal isOpen={isOpen} onClose={handleClose} maxWidth="2xl" showCloseButton={false}>
+            <div className="flex flex-col h-[85dvh]">
                 {/* Fixed Header */}
                 <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
-                    <h2 className="text-xl font-bold text-text-primary">폰트 추가</h2>
+                    <h2 className="text-xl font-bold text-text-primary">
+                        {isEditMode ? '폰트 편집' : '폰트 추가'}
+                    </h2>
+                    {/* X 닫기 아이콘 (PC) */}
+                    <button
+                        onClick={handleClose}
+                        className="text-text-secondary hover:text-text-primary transition-smooth p-1"
+                        aria-label="닫기"
+                    >
+                        <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                            <path d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
 
                 {/* Fixed Tabs */}
@@ -123,8 +168,8 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                         type="button"
                         onClick={() => setActiveTab('basic')}
                         className={`px-6 py-3 font-medium transition-smooth ${activeTab === 'basic'
-                                ? 'text-primary border-b-2 border-primary'
-                                : 'text-text-secondary hover:text-text-primary'
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-text-secondary hover:text-text-primary'
                             }`}
                     >
                         기본 정보
@@ -133,8 +178,8 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                         type="button"
                         onClick={() => setActiveTab('detail')}
                         className={`px-6 py-3 font-medium transition-smooth ${activeTab === 'detail'
-                                ? 'text-primary border-b-2 border-primary'
-                                : 'text-text-secondary hover:text-text-primary'
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-text-secondary hover:text-text-primary'
                             }`}
                     >
                         상세 정보
@@ -336,7 +381,10 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                     </div>
 
                     {/* Fixed Footer */}
-                    <div className="border-t border-border px-6 py-4 flex-shrink-0">
+                    <div
+                        className="border-t border-border px-6 py-4 flex-shrink-0"
+                        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
+                    >
                         {/* 에러 메시지 */}
                         {error && (
                             <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
@@ -344,13 +392,15 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                             </div>
                         )}
 
-                        {/* 버튼 */}
-                        <div className="flex gap-3 justify-end">
+                        {/* 버튼 (반응형) */}
+                        {/* PC: 우측 정렬, 모바일: 양측 정렬 + 전체 너비 */}
+                        <div className="flex gap-3 justify-between sm:justify-end sm:gap-3">
                             <Button
                                 type="button"
                                 variant="secondary"
                                 onClick={handleClose}
                                 disabled={submitting}
+                                className="w-full sm:w-auto"
                             >
                                 취소
                             </Button>
@@ -358,8 +408,12 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess }: Tabbe
                                 type="submit"
                                 variant="primary"
                                 disabled={submitting}
+                                className="w-full sm:w-auto"
                             >
-                                {submitting ? '추가 중...' : '폰트 추가'}
+                                {submitting
+                                    ? (isEditMode ? '수정 중...' : '추가 중...')
+                                    : (isEditMode ? '수정 완료' : '폰트 추가')
+                                }
                             </Button>
                         </div>
                     </div>

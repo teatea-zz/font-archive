@@ -37,16 +37,32 @@ export default function Modal({
         return () => document.removeEventListener('keydown', handleEscape);
     }, [isOpen, onClose]);
 
-    // 모달이 열릴 때 body 스크롤 방지
+    // 모달이 열릴 때 body 스크롤 방지 (모바일 최적화)
     useEffect(() => {
         if (isOpen) {
+            // 현재 스크롤 위치 저장
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.width = '100%';
             document.body.style.overflow = 'hidden';
         } else {
-            document.body.style.overflow = 'unset';
+            // 스크롤 위치 복원
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
         }
 
         return () => {
-            document.body.style.overflow = 'unset';
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
         };
     }, [isOpen]);
 
@@ -82,7 +98,7 @@ export default function Modal({
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/75"
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
         >

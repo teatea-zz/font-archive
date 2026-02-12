@@ -21,14 +21,14 @@ export const fontFormSchema = z.object({
     license: z.enum(['free', 'commercial', 'personal', 'ofl', 'apache', 'unknown'], {
         required_error: '라이선스를 선택해주세요'
     }),
-    tags: z.array(z.string()).default([]),
+    tags: z.array(z.string()),
 
     // 설명
     description: z.string().max(500, '설명은 500자 이하여야 합니다').optional(),
     usageNotes: z.string().max(500, '사용 노트는 500자 이하여야 합니다').optional(),
 
     // 이미지
-    thumbnailUrl: z.string().url('올바른 URL을 입력해주세요').optional().or(z.literal('')),
+    thumbnailUrl: z.string().url('올바른 URL을 입력해주세요').optional().nullable().or(z.literal('')),
 });
 
 export type FontFormData = z.infer<typeof fontFormSchema>;

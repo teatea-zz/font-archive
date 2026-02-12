@@ -6,11 +6,19 @@ import Header from '@/components/layout/Header';
 import FilterBar from '@/components/layout/FilterBar';
 import FontGrid from '@/components/fonts/FontGrid';
 import TabbedAddFontModal from '@/components/modals/TabbedAddFontModal';
+import FontDetailModal from '@/components/modals/FontDetailModal';
+import ConfirmDialog from '@/components/modals/ConfirmDialog';
 import FloatingAddButton from '@/components/ui/FloatingAddButton';
 
 export default function DashboardPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+    const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
     const [fonts, setFonts] = useState<Font[]>([]);
+    const [selectedFont, setSelectedFont] = useState<Font | null>(null);
+    const [editingFont, setEditingFont] = useState<Font | null>(null);
+
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -57,10 +65,91 @@ export default function DashboardPage() {
         fetchFonts();
     }, []);
 
-    // 모달에서 폰트 추가 성공 시
+    // 모달에서 폰트 추가/수정 성공 시
     const handleFontAdded = () => {
         setIsAddModalOpen(false);
+        setEditingFont(null);
         fetchFonts(); // 폰트 목록 새로고침
+    };
+
+    // 상세보기
+    const handleViewDetail = (font: Font) => {
+        setSelectedFont(font);
+        setIsDetailModalOpen(true);
+    };
+
+    // 편집
+    const handleEdit = (font: Font) => {
+        setEditingFont(font);  // selectedFont를 editingFont로 복사
+        setIsAddModalOpen(true);
+        setIsDetailModalOpen(false);
+    };
+
+    // 삭제 클릭
+    const handleDeleteClick = (font: Font) => {
+        setSelectedFont(font);
+        setIsDetailModalOpen(false);
+        setIsDeleteDialogOpen(true);
+    };
+
+    // 삭제 확인
+    const handleDeleteConfirm = async () => {
+        if (!selectedFont) return;
+
+        try {
+            const response = await fetch(`/api/fonts/${selectedFont.id}`, {
+                method: 'DELETE',
+            });
+
+            if (response.ok) {
+                setIsDeleteDialogOpen(false);
+                setSelectedFont(null);
+                fetchFonts();
+            } else {
+                console.error('폰트 삭제 실패:', response.status);
+                alert('폰트 삭제에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('폰트 삭제 에러:', error);
+            alert('폰트 삭제 중 오류가 발생했습니다.');
+        }
+    };
+
+    // 즐겨찾기 토글
+    const handleToggleFavorite = async (fontId: string) => {
+        // Optimistic UI
+        setFonts(fonts.map(f =>
+            f.id === fontId ? { ...f, isFavorite: !f.isFavorite } : f
+        ));
+
+        // 상세 모달이 열려있으면 선택된 폰트도 업데이트
+        if (selectedFont?.id === fontId) {
+            setSelectedFont({
+                ...selectedFont,
+                isFavorite: !selectedFont.isFavorite
+            });
+        }
+
+        try {
+            const response = await fetch(`/api/fonts/${fontId}`, {
+                method: 'PATCH',
+            });
+
+            if (!response.ok) {
+                // 실패 시 롤백
+                setFonts(fonts.map(f =>
+                    f.id === fontId ? { ...f, isFavorite: !f.isFavorite } : f
+                ));
+                if (selectedFont?.id === fontId) {
+                    setSelectedFont({
+                        ...selectedFont,
+                        isFavorite: !selectedFont.isFavorite
+                    });
+                }
+            }
+        } catch (error) {
+            console.error('즐겨찾기 토글 에러:', error);
+        }
     };
 
     // 검색, 필터링, 정렬 로직
@@ -140,14 +229,45 @@ export default function DashboardPage() {
                 </div>
 
                 {/* 폰트 그리드 */}
-                <FontGrid fonts={filteredAndSortedFonts} />
+                <FontGrid
+                    fonts={filteredAndSortedFonts}
+                    onViewDetail={handleViewDetail}
+                    onToggleFavorite={handleToggleFavorite}
+                />
             </main>
 
-            {/* 폰트 추가 모달 */}
+            {/* 폰트 추가/편집 모달 */}
             <TabbedAddFontModal
                 isOpen={isAddModalOpen}
-                onClose={() => setIsAddModalOpen(false)}
+                onClose={() => {
+                    setIsAddModalOpen(false);
+                    setEditingFont(null);
+                }}
                 onSuccess={handleFontAdded}
+                editFont={editingFont}
+            />
+
+            {/* 폰트 상세보기 모달 */}
+            <FontDetailModal
+                isOpen={isDetailModalOpen}
+                onClose={() => setIsDetailModalOpen(false)}
+                font={selectedFont}
+                onEdit={handleEdit}
+                onDelete={handleDeleteClick}
+                onToggleFavorite={handleToggleFavorite}
+            />
+
+            {/* 삭제 확인 다이얼로그 */}
+            <ConfirmDialog
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirm={handleDeleteConfirm}
+                title="폰트 삭제"
+                message="정말로 이 폰트를 삭제하시겠습니까?"
+                highlightText={selectedFont?.name}
+                confirmText="삭제"
+                cancelText="취소"
+                variant="danger"
             />
 
             {/* 모바일 플로팅 추가 버튼 */}

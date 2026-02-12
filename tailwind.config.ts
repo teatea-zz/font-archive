@@ -27,6 +27,9 @@ const config: Config = {
             fontFamily: {
                 sans: ['Pretendard', '-apple-system', 'sans-serif'],
             },
+            spacing: {
+                'safe': 'max(1rem, env(safe-area-inset-bottom))',
+            },
         },
     },
     plugins: [],
