@@ -1,0 +1,3 @@
+# 모든 크롤러 차단 (개인용 아카이브)
+User-agent: *
+Disallow: /
