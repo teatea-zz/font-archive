@@ -11,9 +11,11 @@ import ConfirmDialog from '@/components/modals/ConfirmDialog';
 import FloatingAddButton from '@/components/ui/FloatingAddButton';
 import CompareBar from '@/components/comparison/CompareBar';
 import ComparisonOverlay from '@/components/modals/ComparisonOverlay';
+import Link from 'next/link';
+import Button from '@/components/ui/Button';
 import { useCompareStore } from '@/store/compareStore';
 
-export default function DashboardPage() {
+export default function FavoritesPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -28,15 +30,12 @@ export default function DashboardPage() {
     const [selectedCategory, setSelectedCategory] = useState('all');
     const [sortBy, setSortBy] = useState<SortBy>('latest');
 
-    const { selectedFonts, clearAll } = useCompareStore();
-
     // API에서 폰트 목록 가져오기
     const fetchFonts = async () => {
         try {
             const response = await fetch('/api/fonts');
             if (response.ok) {
                 const data = await response.json();
-                // DB 컬럼명(snake_case)을 Font 타입(camelCase)으로 변환
                 const transformedData = data.map((item: any) => ({
                     id: item.id,
                     name: item.name,
@@ -56,7 +55,8 @@ export default function DashboardPage() {
                     isFavorite: item.is_favorite,
                     googleFontsData: item.google_fonts_data,
                 }));
-                setFonts(transformedData);
+                // 즐겨찾기만 필터링 (API에서 필터링 지원하면 좋겠지만 일단 클라이언트에서)
+                setFonts(transformedData.filter((font: Font) => font.isFavorite));
             } else {
                 console.error('폰트 로드 실패:', response.status);
             }
@@ -71,48 +71,40 @@ export default function DashboardPage() {
         fetchFonts();
     }, []);
 
-    // 모달에서 폰트 추가/수정 성공 시
     const handleFontAdded = () => {
         setIsAddModalOpen(false);
         setEditingFont(null);
-        fetchFonts(); // 폰트 목록 새로고침
+        fetchFonts();
     };
 
-    // 상세보기
     const handleViewDetail = (font: Font) => {
         setSelectedFont(font);
         setIsDetailModalOpen(true);
     };
 
-    // 편집
     const handleEdit = (font: Font) => {
-        setEditingFont(font);  // selectedFont를 editingFont로 복사
+        setEditingFont(font);
         setIsAddModalOpen(true);
         setIsDetailModalOpen(false);
     };
 
-    // 삭제 클릭
     const handleDeleteClick = (font: Font) => {
         setSelectedFont(font);
         setIsDetailModalOpen(false);
         setIsDeleteDialogOpen(true);
     };
 
-    // 삭제 확인
     const handleDeleteConfirm = async () => {
         if (!selectedFont) return;
-
         try {
             const response = await fetch(`/api/fonts/${selectedFont.id}`, {
                 method: 'DELETE',
             });
-
             if (response.ok) {
                 setIsDeleteDialogOpen(false);
                 setSelectedFont(null);
                 fetchFonts();
             } else {
-                console.error('폰트 삭제 실패:', response.status);
                 alert('폰트 삭제에 실패했습니다.');
             }
         } catch (error) {
@@ -121,79 +113,61 @@ export default function DashboardPage() {
         }
     };
 
-    // 즐겨찾기 토글
     const handleToggleFavorite = async (fontId: string) => {
-        // Optimistic UI
-        setFonts(fonts.map(f =>
-            f.id === fontId ? { ...f, isFavorite: !f.isFavorite } : f
-        ));
+        // Optimistic UI: 즐겨찾기 해제 시 목록에서 제거됨
+        // 하지만 즉시 사라지면 당황스러울 수 있으므로, 
+        // 여기서는 상태만 변경하고 필터링은 하지 않거나,
+        // 아니면 즉시 사라지게 할 수도 있음.
+        // 기획의도: 즐겨찾기 페이지니까 해제하면 사라지는게 맞음.
 
-        // 상세 모달이 열려있으면 선택된 폰트도 업데이트
+        setFonts(fonts.filter(f => f.id !== fontId)); // 목록에서 즉시 제거
+
         if (selectedFont?.id === fontId) {
-            setSelectedFont({
-                ...selectedFont,
-                isFavorite: !selectedFont.isFavorite
-            });
+            setSelectedFont({ ...selectedFont, isFavorite: false });
         }
 
         try {
             const response = await fetch(`/api/fonts/${fontId}`, {
                 method: 'PATCH',
             });
-
             if (!response.ok) {
-                // 실패 시 롤백
-                setFonts(fonts.map(f =>
-                    f.id === fontId ? { ...f, isFavorite: !f.isFavorite } : f
-                ));
-                if (selectedFont?.id === fontId) {
-                    setSelectedFont({
-                        ...selectedFont,
-                        isFavorite: !selectedFont.isFavorite
-                    });
-                }
+                fetchFonts(); // 실패 시 원복 (재로딩)
             }
         } catch (error) {
             console.error('즐겨찾기 토글 에러:', error);
+            fetchFonts();
         }
     };
 
-    // 검색, 필터링, 정렬 로직
     const filteredAndSortedFonts = useMemo(() => {
         let result = [...fonts];
 
-        // 1. 검색 필터링
         if (searchQuery.trim()) {
             const query = searchQuery.toLowerCase();
-            result = result.filter((font) => {
-                return (
-                    font.name.toLowerCase().includes(query) ||
-                    font.designer.toLowerCase().includes(query) ||
-                    font.tags.some((tag: string) => tag.toLowerCase().includes(query))
-                );
-            });
+            result = result.filter((font) =>
+                font.name.toLowerCase().includes(query) ||
+                font.designer.toLowerCase().includes(query) ||
+                font.tags.some((tag: string) => tag.toLowerCase().includes(query))
+            );
         }
 
-        // 2. 카테고리 필터링
         if (selectedCategory !== 'all') {
             result = result.filter((font) => font.category === selectedCategory);
         }
 
-        // 3. 정렬
         result.sort((a, b) => {
             switch (sortBy) {
-                case 'name':
-                    return a.name.localeCompare(b.name);
-                case 'designer':
-                    return a.designer.localeCompare(b.designer);
+                case 'name': return a.name.localeCompare(b.name);
+                case 'designer': return a.designer.localeCompare(b.designer);
                 case 'latest':
-                default:
-                    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                default: return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
             }
         });
 
         return result;
     }, [searchQuery, selectedCategory, sortBy, fonts]);
+
+    const { selectedFonts, clearAll } = useCompareStore();
 
     // 배경 클릭 시 선택 해제 핸들러
     const handleBackgroundClick = (e: React.MouseEvent) => {
@@ -212,13 +186,12 @@ export default function DashboardPage() {
         }
     };
 
-    // 로딩 중 표시
     if (loading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-                    <p className="text-text-secondary">폰트 데이터를 불러오는 중...</p>
+                    <p className="text-text-secondary">즐겨찾기 불러오는 중...</p>
                 </div>
             </div>
         );
@@ -229,82 +202,46 @@ export default function DashboardPage() {
             className="min-h-screen bg-background"
             onClick={handleBackgroundClick}
         >
-            <Header
-                searchQuery={searchQuery}
-                onSearchChange={setSearchQuery}
-                onAddClick={() => setIsAddModalOpen(true)}
-            />
+            <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} onAddClick={() => setIsAddModalOpen(true)} />
 
-            <FilterBar
-                selectedCategory={selectedCategory}
-                onCategoryChange={setSelectedCategory}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
-            />
+            <FilterBar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} sortBy={sortBy} onSortChange={setSortBy} />
 
             <main className="max-w-7xl mx-auto px-6 py-8">
-                <div className="mb-6">
-                    <p className="text-text-secondary">
-                        {filteredAndSortedFonts.length}개의 폰트
-                        {searchQuery && ` (검색: "${searchQuery}")`}
-                    </p>
+                <div className="mb-6 flex items-center gap-2">
+                    <h1 className="text-2xl font-bold text-text-primary">⭐ 즐겨찾기</h1>
+                    <span className="text-text-secondary">({filteredAndSortedFonts.length})</span>
                 </div>
 
-                <FontGrid
-                    fonts={filteredAndSortedFonts}
-                    onViewDetail={handleViewDetail}
-                    onToggleFavorite={handleToggleFavorite}
-                />
+                {filteredAndSortedFonts.length > 0 ? (
+                    <FontGrid
+                        fonts={filteredAndSortedFonts}
+                        onViewDetail={handleViewDetail}
+                        onToggleFavorite={handleToggleFavorite}
+                    />
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-20 text-center">
+                        <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                        </div>
+                        <h3 className="text-lg font-medium text-text-primary mb-2">즐겨찾기한 폰트가 없습니다</h3>
+                        <p className="text-text-secondary mb-6">마음에 드는 폰트에 별표를 눌러보세요!</p>
+                        <Link href="/dashboard">
+                            <Button>모든 폰트 보러가기</Button>
+                        </Link>
+                    </div>
+                )}
             </main>
 
-            <TabbedAddFontModal
-                isOpen={isAddModalOpen}
-                onClose={() => {
-                    setIsAddModalOpen(false);
-                    setEditingFont(null);
-                }}
-                onSuccess={handleFontAdded}
-                editFont={editingFont}
-            />
+            <TabbedAddFontModal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingFont(null); }} onSuccess={handleFontAdded} editFont={editingFont} />
+            <FontDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} font={selectedFont} onEdit={handleEdit} onDelete={handleDeleteClick} onToggleFavorite={handleToggleFavorite} />
+            <ConfirmDialog isOpen={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} onConfirm={handleDeleteConfirm} title="폰트 삭제" message="정말로 이 폰트를 삭제하시겠습니까?" highlightText={selectedFont?.name} confirmText="삭제" cancelText="취소" variant="danger" />
 
-            <FontDetailModal
-                isOpen={isDetailModalOpen}
-                onClose={() => setIsDetailModalOpen(false)}
-                font={selectedFont}
-                onEdit={handleEdit}
-                onDelete={handleDeleteClick}
-                onToggleFavorite={handleToggleFavorite}
-            />
+            <CompareBar onOpenOverlay={() => setIsComparisonOpen(true)} />
+            <ComparisonOverlay isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} onToggleFavorite={handleToggleFavorite} />
 
-            <ConfirmDialog
-                isOpen={isDeleteDialogOpen}
-                onClose={() => setIsDeleteDialogOpen(false)}
-                onConfirm={handleDeleteConfirm}
-                title="폰트 삭제"
-                message="정말로 이 폰트를 삭제하시겠습니까?"
-                highlightText={selectedFont?.name}
-                confirmText="삭제"
-                cancelText="취소"
-                variant="danger"
-            />
-
-            {/* 비교하기 바 (클릭 전파 방지) */}
-            <div onClick={(e) => e.stopPropagation()}>
-                <CompareBar onOpenOverlay={() => setIsComparisonOpen(true)} />
-            </div>
-
-            <ComparisonOverlay
-                isOpen={isComparisonOpen}
-                onClose={() => setIsComparisonOpen(false)}
-                onToggleFavorite={handleToggleFavorite}
-            />
-
-            {/* 모바일 플로팅 추가 버튼 (선택된 폰트 없을 때만 표시) */}
-            {selectedFonts.length === 0 && (
-                <div onClick={(e) => e.stopPropagation()}>
-                    <FloatingAddButton onClick={() => setIsAddModalOpen(true)} />
-                </div>
-            )}
+            <FloatingAddButton onClick={() => setIsAddModalOpen(true)} />
         </div>
     );
 }

@@ -3,8 +3,9 @@
 import React from 'react';
 import { Font } from '@/types/font';
 import Badge from '../ui/Badge';
-import Button from '../ui/Button';
+import Checkbox from '../ui/Checkbox';
 import Image from 'next/image';
+import { useCompareStore } from '@/store/compareStore';
 
 interface FontCardProps {
     font: Font;
@@ -39,11 +40,50 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
         return labels[license] || license;
     };
 
+    // 비교하기 스토어
+    const { selectedFonts, toggleFont, isSelected } = useCompareStore();
+    const isFontSelected = isSelected(font.id);
+    const selectedCount = selectedFonts.length;
+
+    const handleCheckboxClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        e.nativeEvent.stopImmediatePropagation(); // 더 강력한 전파 방지
+
+        // 3개 이상이고 선택되지 않은 상태라면 동작 안 함 (disabled 상태지만 안전장치)
+        if (!isFontSelected && selectedCount >= 3) return;
+        toggleFont(font);
+    };
+
     return (
         <div
             onClick={() => onViewDetail?.(font)}
-            className="bg-white rounded-lg border border-border overflow-hidden transition-smooth hover:shadow-md hover:scale-[1.02] group cursor-pointer"
+            className={`bg-white rounded-lg border overflow-hidden transition-smooth hover:shadow-md hover:scale-[1.02] group cursor-pointer relative ${isFontSelected ? 'border-primary ring-1 ring-primary' : 'border-border'
+                }`}
         >
+            {/* 비교 체크박스 (우측 상단) */}
+            <div
+                className="absolute top-2 right-2 z-10 w-10 h-10 flex items-center justify-center cursor-pointer hover:bg-black/5 rounded-full transition-colors"
+                onClick={handleCheckboxClick}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // 3개 이상이고 선택되지 않은 상태라면 동작 안 함
+                        if (!isFontSelected && selectedCount >= 3) return;
+                        toggleFont(font);
+                    }
+                }}
+            >
+                <Checkbox
+                    checked={isFontSelected}
+                    onChange={() => { }} // 부모 div onClick에서 처리
+                    disabled={!isFontSelected && selectedCount >= 3}
+                    className="pointer-events-none" // Checkbox 내부 클릭 이벤트 무시하고 부모 div에서 처리
+                />
+            </div>
+
             {/* 썸네일 이미지 */}
             <div className="relative w-full aspect-[16/9] bg-background-secondary overflow-hidden">
                 {font.thumbnailUrl ? (
