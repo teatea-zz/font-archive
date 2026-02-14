@@ -79,7 +79,7 @@ export default function Header({ searchQuery, onSearchChange, onAddClick }: Head
                     {/* PC 즐겨찾기 버튼 (기존) */}
                     <Button
                         variant="ghost"
-                        className="hidden md:flex"
+                        className="hidden md:flex rounded-lg"
                         onClick={() => router.push('/favorites')}
                     >
                         <svg className="w-5 h-5 mr-1" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,17 +91,20 @@ export default function Header({ searchQuery, onSearchChange, onAddClick }: Head
                     {/* 추가 버튼 */}
                     <Button
                         variant="primary"
-                        className="hidden md:flex"
+                        className="hidden md:flex rounded-lg"
                         onClick={onAddClick}
                     >
-                        <svg className="w-5 h-5 mr-1" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                        {/* <svg className="w-5 h-5 mr-1" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                             <path d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span className="hidden md:inline">추가</span>
+                        </svg> */}
+                        <span className="hidden md:inline">폰트 추가</span>
                     </Button>
 
                     {/* 로그아웃 버튼 */}
-                    <Button variant="ghost" onClick={handleLogout}>
+                    <Button
+                        variant="ghost"
+                        className="rounded-lg"
+                        onClick={handleLogout}>
                         <svg className="w-5 h-5 mr-1" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                             <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>

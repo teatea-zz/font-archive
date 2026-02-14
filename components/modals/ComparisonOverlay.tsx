@@ -54,7 +54,7 @@ export default function ComparisonOverlay({ isOpen, onClose, onToggleFavorite }:
                 }`}>
                 {/* 헤더 */}
                 <div className="w-full border-b border-border bg-white shrink-0">
-                    <div className="flex items-center justify-between px-4 py-3">
+                    <div className="flex items-center justify-between px-6 py-4">
                         <h2 className="text-lg font-bold text-text-primary">
                             폰트 비교 ({selectedFonts.length})
                         </h2>
@@ -118,7 +118,7 @@ function ComparisonCard({ font, onToggleFavorite }: { font: any, onToggleFavorit
     return (
         <div className="flex flex-col h-full">
             {/* 이미지 */}
-            <div className="relative w-full aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden mb-4 shrink-0">
+            <div className="relative w-full aspect-[16/9] bg-gray-100 rounded-lg overflow-hidden mb-6 shrink-0">
                 {font.thumbnailUrl ? (
                     <Image src={font.thumbnailUrl} alt={font.name} fill className="object-cover" unoptimized />
                 ) : (

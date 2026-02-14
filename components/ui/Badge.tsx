@@ -15,7 +15,7 @@ export default function Badge({ label, variant = 'category', className = '' }: B
 
     return (
         <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium border ${variantStyles[variant]} ${className}`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium border ${variantStyles[variant]} ${className}`}
         >
             {label}
         </span>

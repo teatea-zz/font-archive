@@ -242,7 +242,7 @@ export default function DashboardPage() {
                 onSortChange={setSortBy}
             />
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-7xl mx-auto px-6 pt-6 pb-10">
                 <div className="mb-6">
                     <p className="text-text-secondary">
                         {filteredAndSortedFonts.length}개의 폰트

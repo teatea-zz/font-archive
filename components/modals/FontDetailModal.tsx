@@ -26,6 +26,11 @@ export default function FontDetailModal({
 }: FontDetailModalProps) {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 
+    // 폰트가 변경될 때 이미지 인덱스 초기화
+    React.useEffect(() => {
+        setSelectedImageIndex(0);
+    }, [font?.id]);
+
     if (!font) return null;
 
     // 메인 이미지 (선택된 이미지 또는 첫 번째 이미지)
@@ -130,9 +135,9 @@ export default function FontDetailModal({
                                 <button
                                     key={index}
                                     onClick={() => thumb && setSelectedImageIndex(index)}
-                                    className={`relative w-full aspect-square rounded border-2 overflow-hidden transition-all ${selectedImageIndex === index && thumb
-                                        ? 'border-primary'
-                                        : 'border-border hover:border-primary/50'
+                                    className={`relative w-full aspect-square rounded-lg border-2 overflow-hidden transition-all ${selectedImageIndex === index && thumb
+                                        ? 'border-primary bg-primary'
+                                        : 'border-border hover:border-primary/50 bg-background-secondary'
                                         } ${thumb ? 'cursor-pointer' : 'cursor-default'}`}
                                     disabled={!thumb}
                                 >
@@ -141,7 +146,7 @@ export default function FontDetailModal({
                                             src={thumb}
                                             alt={`${font.name} ${index + 1}`}
                                             fill
-                                            className="object-cover"
+                                            className="object-cover rounded-md scale-[1.02]"
                                             unoptimized
                                         />
                                     ) : (

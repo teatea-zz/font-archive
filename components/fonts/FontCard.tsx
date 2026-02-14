@@ -57,7 +57,9 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
     return (
         <div
             onClick={() => onViewDetail?.(font)}
-            className={`bg-white rounded-lg border overflow-hidden transition-smooth hover:shadow-md hover:scale-[1.02] group cursor-pointer relative ${isFontSelected ? 'border-primary ring-1 ring-primary' : 'border-border'
+            className={`bg-white rounded-lg border transition-all duration-200 group cursor-pointer relative overflow-hidden ${isFontSelected
+                ? 'border-primary ring-1 ring-primary shadow-200 scale-[1.01] z-10'
+                : 'border-border shadow-100 hover:shadow-200 hover:scale-[1.01]'
                 }`}
         >
             {/* 비교 체크박스 (우측 상단) */}
@@ -85,7 +87,7 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
             </div>
 
             {/* 썸네일 이미지 */}
-            <div className="relative w-full aspect-[16/9] bg-background-secondary overflow-hidden">
+            <div className="relative w-full aspect-[16/9] bg-background-secondary border-b border-border">
                 {font.thumbnailUrl ? (
                     <Image
                         src={font.thumbnailUrl}
@@ -104,7 +106,7 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
             </div>
 
             {/* 카드 내용 */}
-            <div className="p-3">
+            <div className="p-6">
                 {/* 폰트명 + 즐겨찾기 */}
                 <div className="flex items-center gap-2 mb-2">
                     <h3 className="text-lg font-bold text-text-primary truncate flex-1">
