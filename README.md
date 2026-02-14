@@ -6,4 +6,4 @@ Tech Stack: Next.js, Supabase, Tailwind CSS.
 
 **버전**: v1.8 (Phase 8 완료)  
 **마지막 업데이트**: 2026-02-14  
-**Phase 6 업데이트**: 기본적인 스타일링과 디테일 수정(버그 픽스)
+**Phase 8 업데이트**: UI 리팩토링 및 인터랙션 로직 수정
