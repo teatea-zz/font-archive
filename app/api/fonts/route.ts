@@ -3,6 +3,27 @@ import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyAuthToken } from '@/lib/auth';
 
+// Supabase 'fonts' 테이블 스키마 정의
+interface DatabaseFont {
+    id: string;
+    name: string;
+    designer: string;
+    foundry: string | null;
+    download_url: string | null;
+    official_url: string | null;
+    category: string;
+    license: string;
+    tags: string[];
+    description: string | null;
+    usage_notes: string | null;
+    image_urls: string[];
+    thumbnail_url: string | null;
+    created_at: string;
+    updated_at: string;
+    is_favorite: boolean;
+    google_fonts_data: unknown;
+}
+
 /**
  * GET /api/fonts
  * 전체 폰트 목록 조회 (최신순)
@@ -55,6 +76,7 @@ export async function POST(request: Request) {
         // Supabase에 폰트 추가
         const { data, error } = await supabaseAdmin
             .from('fonts')
+            // @ts-expect-error: Supabase client cannot infer 'fonts' table schema correctly, resulting in 'never' type mismatch for insert input.
             .insert([body])
             .select()
             .single();
@@ -64,8 +86,11 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: error.message }, { status: 500 });
         }
 
-        console.log('✅ 폰트 추가 성공:', data.id);
-        return NextResponse.json(data, { status: 201 });
+        // data는 unknown 또는 any일 수 있으므로 안전하게 접근
+        const newFont = data as unknown as DatabaseFont;
+
+        console.log('✅ 폰트 추가 성공:', newFont.id);
+        return NextResponse.json(newFont, { status: 201 });
     } catch (error) {
         console.error('API 에러:', error);
         return NextResponse.json(

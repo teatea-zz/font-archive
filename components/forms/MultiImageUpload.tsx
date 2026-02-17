@@ -82,7 +82,7 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                             onClick={() => !imageUrl && handleSlotClick(slotIndex)}
                         >
                             <input
-                                ref={(el) => (fileInputRefs.current[slotIndex] = el)}
+                                ref={(el) => { fileInputRefs.current[slotIndex] = el; }}
                                 type="file"
                                 accept="image/*"
                                 onChange={(e) => e.target.files?.[0] && handleFileChange(e.target.files[0], slotIndex)}
