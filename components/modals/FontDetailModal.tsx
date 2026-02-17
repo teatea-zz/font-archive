@@ -118,7 +118,8 @@ export default function FontDetailModal({
                                     alt={font.name}
                                     fill
                                     className="object-cover"
-                                    unoptimized
+                                    priority
+                                    sizes="(max-width: 768px) 100vw, 800px"
                                 />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-text-secondary">
@@ -147,7 +148,7 @@ export default function FontDetailModal({
                                             alt={`${font.name} ${index + 1}`}
                                             fill
                                             className="object-cover rounded-md scale-[1.02]"
-                                            unoptimized
+                                            sizes="120px"
                                         />
                                     ) : (
                                         <div className="w-full h-full bg-background-secondary flex items-center justify-center">

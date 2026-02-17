@@ -23,17 +23,35 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
             return;
         }
 
-        if (file.size > 5 * 1024 * 1024) {
-            setError('파일 크기는 5MB 이하여야 합니다');
+        // 초기 파일 크기 체크 (압축 전 너무 큰 파일 방지, 예: 20MB)
+        if (file.size > 20 * 1024 * 1024) {
+            setError('원본 파일 크기는 20MB 이하여야 합니다');
             return;
         }
 
-        // 업로드
+        // 업로드 상태 시작
         setUploading(slotIndex);
-        const formData = new FormData();
-        formData.append('file', file);
 
         try {
+            // 1. 이미지 압축 및 WebP 변환
+            // browser-image-compression 동적 임포트 (Next.js SSR 이슈 방지)
+            const imageCompression = (await import('browser-image-compression')).default;
+
+            const options = {
+                maxSizeMB: 1,           // 최대 1MB
+                maxWidthOrHeight: 1920, // 최대 해상도 FHD
+                useWebWorker: true,     // 웹 워커 사용
+                fileType: 'image/webp', // WebP로 변환
+                initialQuality: 0.8     // 초기 품질
+            };
+
+            const compressedFile = await imageCompression(file, options);
+            console.log(`🗜️ 이미지 압축: ${(file.size / 1024 / 1024).toFixed(2)}MB -> ${(compressedFile.size / 1024 / 1024).toFixed(2)}MB`);
+
+            // 2. 업로드
+            const formData = new FormData();
+            formData.append('file', compressedFile);
+
             const response = await fetch('/api/upload', {
                 method: 'POST',
                 body: formData,
@@ -49,8 +67,8 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                 setError(data.error || '업로드 실패');
             }
         } catch (err) {
-            console.error('업로드 에러:', err);
-            setError('업로드 중 오류가 발생했습니다');
+            console.error('업로드/압축 에러:', err);
+            setError('이미지 처리 중 오류가 발생했습니다');
         } finally {
             setUploading(null);
         }
