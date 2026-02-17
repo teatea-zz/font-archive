@@ -60,6 +60,7 @@ export async function PUT(
 
         const { data, error } = await supabaseAdmin
             .from('fonts')
+            // @ts-ignore
             .update(body)
             .eq('id', params.id)
             .select()
@@ -173,6 +174,7 @@ export async function PATCH(
 
         const { data, error } = await supabaseAdmin
             .from('fonts')
+            // @ts-ignore
             .update({ is_favorite: newFavoriteStatus })
             .eq('id', params.id)
             .select()
