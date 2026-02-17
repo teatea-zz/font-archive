@@ -47,7 +47,7 @@ export default function AuthPage() {
                 setError('잘못된 PIN 코드입니다');
                 setPin('');
             }
-        } catch (_) {
+        } catch {
             setError('오류가 발생했습니다');
             setPin('');
         } finally {

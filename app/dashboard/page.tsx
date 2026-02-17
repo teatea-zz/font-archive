@@ -36,8 +36,29 @@ export default function DashboardPage() {
             const response = await fetch('/api/fonts');
             if (response.ok) {
                 const data = await response.json();
+                // DB 응답 타입 정의
+                interface DatabaseFont {
+                    id: string;
+                    name: string;
+                    designer: string;
+                    foundry: string | null;
+                    download_url: string | null;
+                    official_url: string | null;
+                    category: string;
+                    license: string;
+                    tags: string[];
+                    description: string | null;
+                    usage_notes: string | null;
+                    image_urls: string[];
+                    thumbnail_url: string | null;
+                    created_at: string;
+                    updated_at: string;
+                    is_favorite: boolean;
+                    google_fonts_data: unknown;
+                }
+
                 // DB 컬럼명(snake_case)을 Font 타입(camelCase)으로 변환
-                const transformedData: Font[] = data.map((item: any) => ({
+                const transformedData: Font[] = data.map((item: DatabaseFont) => ({
                     id: item.id,
                     name: item.name,
                     designer: item.designer,
