@@ -60,7 +60,7 @@ export async function PUT(
 
         const { data, error } = await supabaseAdmin
             .from('fonts')
-            // @ts-ignore
+            // @ts-expect-error
             .update(body)
             .eq('id', params.id)
             .select()
@@ -99,11 +99,11 @@ export async function DELETE(
         }
 
         // 1. 이미지 URL 가져오기
-        const { data: font } = await supabaseAdmin
+        const { data: font } = (await supabaseAdmin
             .from('fonts')
             .select('image_urls')
             .eq('id', params.id)
-            .single();
+            .single()) as any;
 
         // 2. Storage에서 이미지 삭제
         if (font?.image_urls && Array.isArray(font.image_urls) && font.image_urls.length > 0) {
@@ -163,18 +163,18 @@ export async function PATCH(
         }
 
         // 현재 즐겨찾기 상태 가져오기
-        const { data: currentFont } = await supabaseAdmin
+        const { data: currentFont } = (await supabaseAdmin
             .from('fonts')
             .select('is_favorite')
             .eq('id', params.id)
-            .single();
+            .single()) as any;
 
         // 토글
         const newFavoriteStatus = !currentFont?.is_favorite;
 
         const { data, error } = await supabaseAdmin
             .from('fonts')
-            // @ts-ignore
+            // @ts-expect-error
             .update({ is_favorite: newFavoriteStatus })
             .eq('id', params.id)
             .select()
