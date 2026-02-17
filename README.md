@@ -4,6 +4,6 @@
 
 Tech Stack: Next.js, Supabase, Tailwind CSS.
 
-**버전**: v1.8 (Phase 8 완료)  
-**마지막 업데이트**: 2026-02-14  
-**Phase 8 업데이트**: UI 리팩토링 및 인터랙션 로직 수정
+**버전**: v1.9 (Phase 9 완료)  
+**마지막 업데이트**: 2026-02-17  
+**Phase 9 업데이트**: Vercel 배포 및 이미지 성능 최적화

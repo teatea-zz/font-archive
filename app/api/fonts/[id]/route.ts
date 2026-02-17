@@ -119,20 +119,20 @@ export async function DELETE(
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // 1. 이미지 URL 가져오기
+        // 1. 이미지 URL 및 썸네일 URL 가져오기
         const { data } = await supabaseAdmin
             .from('fonts')
-            .select('image_urls')
+            .select('image_urls, thumbnail_url')
             .eq('id', params.id)
             .single();
 
         // Supabase 추론 실패 시 data가 never일 수 있으므로 unknown 거쳐서 캐스팅
-        const font = data as unknown as Pick<DatabaseFont, 'image_urls'> | null;
+        const font = data as unknown as Pick<DatabaseFont, 'image_urls' | 'thumbnail_url'> | null;
 
-        // 2. Storage에서 이미지 삭제
+        // 2-1. Storage에서 상세 이미지 삭제 (font-images 버킷)
         if (font?.image_urls && Array.isArray(font.image_urls) && font.image_urls.length > 0) {
             const fileNames = (font.image_urls).map((url: string) => {
-                // URL에서 파일명 추출
+                // URL에서 파일명 추출 (경로가 포함된 경우 마지막 부분만 사용)
                 const parts = url.split('/');
                 return parts[parts.length - 1];
             });
@@ -142,9 +142,26 @@ export async function DELETE(
                 .remove(fileNames);
 
             if (storageError) {
-                console.warn('⚠️ Storage 삭제 실패 (계속 진행):', storageError);
+                console.warn('⚠️ 상세 이미지 삭제 실패 (계속 진행):', storageError);
             } else {
-                console.log('🗑️ Storage 이미지 삭제:', fileNames.length, '개');
+                console.log('🗑️ 상세 이미지 삭제:', fileNames.length, '개');
+            }
+        }
+
+        // 2-2. Storage에서 썸네일 삭제 (font-thumbnails 버킷)
+        if (font?.thumbnail_url) {
+            // URL에서 파일명 추출
+            const parts = font.thumbnail_url.split('/');
+            const fileName = parts[parts.length - 1];
+
+            const { error: thumbError } = await supabaseAdmin.storage
+                .from('font-thumbnails')
+                .remove([fileName]);
+
+            if (thumbError) {
+                console.warn('⚠️ 썸네일 삭제 실패 (계속 진행):', thumbError);
+            } else {
+                console.log('🗑️ 썸네일 삭제 성공:', fileName);
             }
         }
 
