@@ -36,7 +36,7 @@ export default function FavoritesPage() {
             const response = await fetch('/api/fonts');
             if (response.ok) {
                 const data = await response.json();
-                const transformedData = data.map((item: any) => ({
+                const transformedData: Font[] = data.map((item: any) => ({
                     id: item.id,
                     name: item.name,
                     designer: item.designer,

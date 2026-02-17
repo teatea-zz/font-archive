@@ -47,7 +47,7 @@ export default function AuthPage() {
                 setError('잘못된 PIN 코드입니다');
                 setPin('');
             }
-        } catch (err) {
+        } catch (_) {
             setError('오류가 발생했습니다');
             setPin('');
         } finally {
@@ -73,8 +73,8 @@ export default function AuthPage() {
                             <div
                                 key={i}
                                 className={`w-16 h-16 rounded-lg border-2 flex items-center justify-center text-2xl ${pin.length > i
-                                        ? 'border-primary bg-primary/10'
-                                        : 'border-border bg-background-secondary'
+                                    ? 'border-primary bg-primary/10'
+                                    : 'border-border bg-background-secondary'
                                     }`}
                             >
                                 {pin.length > i && '●'}

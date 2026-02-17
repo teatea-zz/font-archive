@@ -37,7 +37,7 @@ export default function DashboardPage() {
             if (response.ok) {
                 const data = await response.json();
                 // DB 컬럼명(snake_case)을 Font 타입(camelCase)으로 변환
-                const transformedData = data.map((item: any) => ({
+                const transformedData: Font[] = data.map((item: any) => ({
                     id: item.id,
                     name: item.name,
                     designer: item.designer,

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Category, SortBy } from '@/types/font';
+import { SortBy } from '@/types/font';
 import { categoryOptions, sortOptions } from '@/lib/mockData';
 
 interface FilterBarProps {
@@ -28,8 +28,8 @@ export default function FilterBar({
                                 key={option.value}
                                 onClick={() => onCategoryChange(option.value)}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-smooth ${selectedCategory === option.value
-                                        ? 'bg-primary text-white'
-                                        : 'bg-background-secondary text-text-primary hover:bg-border'
+                                    ? 'bg-primary text-white'
+                                    : 'bg-background-secondary text-text-primary hover:bg-border'
                                     }`}
                             >
                                 {option.label}

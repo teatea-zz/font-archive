@@ -13,7 +13,7 @@ interface TabbedAddFontModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    editFont?: any | null; // Font 타입 (편집 모드)
+    editFont?: import('@/types/font').Font | null; // Font 타입 (편집 모드)
 }
 
 type Tab = 'basic' | 'detail';

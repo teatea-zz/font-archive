@@ -5,7 +5,6 @@ import { useCompareStore } from '@/store/compareStore';
 import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import Image from 'next/image';
-import Modal from '../ui/Modal'; // 재사용 가능한가? 아니면 독립적 오버레이? 기획안엔 독립적이라 했음.
 // 하지만 Modal 로직(스크롤락 등)을 가져오는 게 좋음.
 // 여기서는 기획안대로 독립적인 오버레이로 구현하되, Modal 로직을 참고하여 스크롤 락을 구현하거나, 
 // Modal 컴포넌트를 활용하되 스타일을 커스텀하는 방식도 고려 가능.
@@ -114,7 +113,7 @@ export default function ComparisonOverlay({ isOpen, onClose, onToggleFavorite }:
 }
 
 // 내부 카드 컴포넌트
-function ComparisonCard({ font, onToggleFavorite }: { font: any, onToggleFavorite?: (id: string) => void }) {
+function ComparisonCard({ font, onToggleFavorite }: { font: import('@/types/font').Font, onToggleFavorite?: (id: string) => void }) {
     return (
         <div className="flex flex-col h-full">
             {/* 이미지 */}

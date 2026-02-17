@@ -82,7 +82,7 @@ export default function ConfirmDialog({
                     </p>
                     {highlightText && (
                         <p className="text-lg font-bold text-text-primary">
-                            "{highlightText}"
+                            &quot;{highlightText}&quot;
                         </p>
                     )}
                     <p className="text-sm text-text-secondary mt-3">

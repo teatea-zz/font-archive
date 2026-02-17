@@ -42,7 +42,7 @@ export async function POST(request: Request) {
         const buffer = Buffer.from(arrayBuffer);
 
         // Supabase Storage에 업로드
-        const { data, error } = await supabaseAdmin.storage
+        const { error } = await supabaseAdmin.storage
             .from('font-images')
             .upload(filename, buffer, {
                 contentType: file.type,
