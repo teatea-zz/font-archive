@@ -3,6 +3,27 @@ import { cookies } from 'next/headers';
 import { supabaseAdmin } from '@/lib/supabase';
 import { verifyAuthToken } from '@/lib/auth';
 
+// Supabase 'fonts' 테이블 스키마 정의
+interface DatabaseFont {
+    id: string;
+    name: string;
+    designer: string;
+    foundry: string | null;
+    download_url: string | null;
+    official_url: string | null;
+    category: string;
+    license: string;
+    tags: string[];
+    description: string | null;
+    usage_notes: string | null;
+    image_urls: string[];
+    thumbnail_url: string | null;
+    created_at: string;
+    updated_at: string;
+    is_favorite: boolean;
+    google_fonts_data: unknown;
+}
+
 /**
  * GET /api/fonts/[id]
  * 특정 폰트 조회
@@ -60,7 +81,7 @@ export async function PUT(
 
         const { data, error } = await supabaseAdmin
             .from('fonts')
-            // @ts-expect-error
+            // @ts-expect-error: Supabase client cannot infer 'fonts' table schema correctly, resulting in 'never' type for update input.
             .update(body)
             .eq('id', params.id)
             .select()
@@ -99,15 +120,18 @@ export async function DELETE(
         }
 
         // 1. 이미지 URL 가져오기
-        const { data: font } = (await supabaseAdmin
+        const { data } = await supabaseAdmin
             .from('fonts')
             .select('image_urls')
             .eq('id', params.id)
-            .single()) as any;
+            .single();
+
+        // Supabase 추론 실패 시 data가 never일 수 있으므로 unknown 거쳐서 캐스팅
+        const font = data as unknown as Pick<DatabaseFont, 'image_urls'> | null;
 
         // 2. Storage에서 이미지 삭제
         if (font?.image_urls && Array.isArray(font.image_urls) && font.image_urls.length > 0) {
-            const fileNames = (font.image_urls as string[]).map((url: string) => {
+            const fileNames = (font.image_urls).map((url: string) => {
                 // URL에서 파일명 추출
                 const parts = url.split('/');
                 return parts[parts.length - 1];
@@ -163,18 +187,21 @@ export async function PATCH(
         }
 
         // 현재 즐겨찾기 상태 가져오기
-        const { data: currentFont } = (await supabaseAdmin
+        const { data } = await supabaseAdmin
             .from('fonts')
             .select('is_favorite')
             .eq('id', params.id)
-            .single()) as any;
+            .single();
+
+        // Supabase 추론 실패 시 data가 never일 수 있으므로 unknown 거쳐서 캐스팅
+        const currentFont = data as unknown as Pick<DatabaseFont, 'is_favorite'> | null;
 
         // 토글
         const newFavoriteStatus = !currentFont?.is_favorite;
 
-        const { data, error } = await supabaseAdmin
+        const { data: updatedData, error } = await supabaseAdmin
             .from('fonts')
-            // @ts-expect-error
+            // @ts-expect-error: Supabase client cannot infer 'fonts' table schema correctly, resulting in 'never' type for update input.
             .update({ is_favorite: newFavoriteStatus })
             .eq('id', params.id)
             .select()
@@ -186,7 +213,7 @@ export async function PATCH(
         }
 
         console.log('✅ 즐겨찾기 토글:', params.id, '→', newFavoriteStatus);
-        return NextResponse.json(data);
+        return NextResponse.json(updatedData);
     } catch (error) {
         console.error('API 에러:', error);
         return NextResponse.json(
