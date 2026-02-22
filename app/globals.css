@@ -1,3 +1,6 @@
+/* Roboto Mono (tokens.json: font.family.mono) */
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -14,6 +17,22 @@
 
   @font-face {
     font-family: 'Pretendard';
+    font-weight: 500;
+    font-style: normal;
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Pretendard';
+    font-weight: 600;
+    font-style: normal;
+    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'Pretendard';
     font-weight: 700;
     font-style: normal;
     src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
@@ -21,12 +40,16 @@
   }
 }
 
-/* 기본 스타일 */
+/* 전역 폰트 렌더링 — 전체에 antialiased 적용 */
 @layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
   body {
-    @apply font-sans text-text-primary bg-background antialiased;
+    @apply font-sans text-text-primary bg-background;
     line-height: 1.5;
-    /* Adobe Spectrum Body */
   }
 
   h1,
@@ -37,7 +60,6 @@
   h6 {
     @apply font-bold;
     line-height: 1.3;
-    /* Adobe Spectrum Heading */
   }
 
   strong,
@@ -72,7 +94,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: #E1E1E1;
+  background-color: #D6D6D6;
   border-radius: 6px;
   border: 3px solid transparent;
   background-clip: content-box;

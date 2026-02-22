@@ -166,7 +166,7 @@ export const categoryOptions = [
  * 정렬 옵션
  */
 export const sortOptions = [
-    { value: 'latest', label: '최신순' },
+    { value: 'latest', label: '최근등록순' },
     { value: 'name', label: '이름순' },
     { value: 'designer', label: '디자이너순' },
 ];

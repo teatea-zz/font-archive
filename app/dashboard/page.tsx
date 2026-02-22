@@ -236,7 +236,7 @@ export default function DashboardPage() {
     // 로딩 중 표시
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="min-h-screen flex items-center justify-center bg-white">
                 <div className="text-center">
                     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
                     <p className="text-text-secondary">폰트 데이터를 불러오는 중...</p>
@@ -247,7 +247,7 @@ export default function DashboardPage() {
 
     return (
         <div
-            className="min-h-screen bg-background"
+            className="min-h-screen bg-white"
             onClick={handleBackgroundClick}
         >
             <Header
@@ -266,7 +266,7 @@ export default function DashboardPage() {
             <main className="max-w-7xl mx-auto px-6 pt-6 pb-10">
                 <div className="mb-6">
                     <p className="text-text-secondary">
-                        {filteredAndSortedFonts.length}개의 폰트
+                        <span style={{ fontFamily: "'Roboto Mono', monospace" }} className="font-bold">{filteredAndSortedFonts.length}</span>개의 폰트
                         {searchQuery && ` (검색: "${searchQuery}")`}
                     </p>
                 </div>

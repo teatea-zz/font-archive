@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 export default function AuthPage() {
     const [pin, setPin] = useState('');
@@ -60,7 +61,15 @@ export default function AuthPage() {
             <div className="w-full max-w-md px-8">
                 {/* 로고 및 환영 메시지 */}
                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold mb-4 text-primary">폰트 아카이브</h1>
+                    <div className="flex justify-center mb-4">
+                        <Image
+                            src="/images/logo_text_L.svg"
+                            alt="폰트 아카이브"
+                            width={240}
+                            height={56}
+                            priority
+                        />
+                    </div>
                     <p className="text-text-secondary text-lg">
                         개인 폰트 아카이브에 오신 것을 환영합니다
                     </p>
