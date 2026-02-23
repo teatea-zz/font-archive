@@ -58,6 +58,6 @@ export const config = {
          * - favicon.ico
          * - robots.txt
          */
-        '/((?!api/auth/verify-pin|_next/static|_next/image|favicon.ico|robots.txt).*)',
+        '/((?!api/auth/verify-pin|_next/static|_next/image|favicon.ico|robots.txt|images/).*)',
     ],
 };
