@@ -3,9 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { fontFormSchema, type FontFormData, categoryOptions, licenseOptions } from '@/lib/validations/font';
+import { fontFormSchema, type FontFormData, categoryOptions, licenseOptions, fontTypeOptions } from '@/lib/validations/font';
 import Modal from '@/components/ui/Modal';
-import Button from '@/components/ui/Button';
 import TagInput from '@/components/forms/TagInput';
 import MultiImageUpload from '@/components/forms/MultiImageUpload';
 
@@ -13,10 +12,26 @@ interface TabbedAddFontModalProps {
     isOpen: boolean;
     onClose: () => void;
     onSuccess: () => void;
-    editFont?: import('@/types/font').Font | null; // Font 타입 (편집 모드)
+    editFont?: import('@/types/font').Font | null;
 }
 
-type Tab = 'basic' | 'detail';
+type Tab = 'basic' | 'detail' | 'webfont';
+
+/** 입력 필드 공통 스타일 */
+const inputClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-base font-normal font-sans leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors";
+const urlInputClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-xs font-normal font-mono leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors";
+const selectClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-base font-normal font-sans leading-4 focus:outline-primary focus:outline-2 transition-colors";
+const textareaClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-sm font-normal font-mono leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors resize-none";
+
+/** 필드 라벨 컴포넌트 */
+function FieldLabel({ label, required = false }: { label: string; required?: boolean }) {
+    return (
+        <div className="inline-flex items-center gap-0.5">
+            <span className="text-gray-700 text-xs font-normal font-sans leading-4">{label}</span>
+            {required && <span className="text-red-500 text-sm font-normal font-mono leading-4">*</span>}
+        </div>
+    );
+}
 
 export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFont = null }: TabbedAddFontModalProps) {
     const isEditMode = !!editFont;
@@ -38,34 +53,36 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
             tags: [],
             category: 'gothic',
             license: 'ofl',
+            fontType: 'otf_ttf',
         },
     });
 
     const tags = watch('tags');
-
-    // 이미지 배열을 위한 별도 상태
     const [images, setImages] = useState<string[]>([]);
 
     // editFont가 변경되면 form 데이터 초기화
     useEffect(() => {
         if (editFont) {
-            // 모든 필드 값 설정
             reset({
                 name: editFont.name || '',
+                englishName: editFont.englishName || '',
                 designer: editFont.designer || '',
                 foundry: editFont.foundry || '',
                 downloadUrl: editFont.downloadUrl || '',
                 officialUrl: editFont.officialUrl || '',
                 category: editFont.category || 'gothic',
                 license: editFont.license || 'ofl',
+                fontType: editFont.fontType || undefined,
+                weightCount: editFont.weightCount || undefined,
                 tags: editFont.tags || [],
                 description: editFont.description || '',
                 usageNotes: editFont.usageNotes || '',
+                webFontLinkEmbed: editFont.webFontSnippets?.linkEmbed || '',
+                webFontCssClass: editFont.webFontSnippets?.cssClass || '',
+                webFontImportCode: editFont.webFontSnippets?.importCode || '',
             });
-            // 이미지도 설정
             setImages(editFont.imageUrls || []);
         } else {
-            // 추가 모드일 때는 초기화
             reset({
                 tags: [],
                 category: 'gothic',
@@ -75,7 +92,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
         }
     }, [editFont, reset]);
 
-    // 탭 전환 시 스크롤을 맨 위로 리셋
+    // 탭 전환 시 스크롤 맨 위로
     useEffect(() => {
         if (contentRef.current) {
             contentRef.current.scrollTop = 0;
@@ -87,46 +104,57 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
         setError(null);
 
         try {
-            // snake_case로 변환 (API 형식)
+            // web_font_snippets: 모든 값이 비어있으면 null로 저장
+            const hasWebFontSnippets = data.webFontLinkEmbed || data.webFontCssClass || data.webFontImportCode;
+            const webFontSnippets = hasWebFontSnippets ? {
+                link_embed: data.webFontLinkEmbed || null,
+                css_class: data.webFontCssClass || null,
+                import_code: data.webFontImportCode || null,
+            } : null;
+
             const requestData = {
                 name: data.name,
+                english_name: data.englishName || null,
                 designer: data.designer,
                 foundry: data.foundry || null,
                 download_url: data.downloadUrl || null,
                 official_url: data.officialUrl || null,
                 category: data.category,
                 license: data.license,
+                font_type: data.fontType || null,
+                weight_count: data.weightCount || null,
                 tags: data.tags,
                 description: data.description || null,
                 usage_notes: data.usageNotes || null,
-                image_urls: images, // 다중 이미지 배열
-                thumbnail_url: images[0] || null, // 첫 번째 이미지를 썸네일로
+                image_urls: images,
+                thumbnail_url: images[0] || null,
+                web_font_snippets: webFontSnippets,
             };
 
             const url = isEditMode ? `/api/fonts/${editFont.id}` : '/api/fonts';
             const method = isEditMode ? 'PUT' : 'POST';
 
+            console.log(`[FontModal] ${method} ${url}`, JSON.stringify(requestData, null, 2));
+
             const response = await fetch(url, {
                 method,
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(requestData),
             });
 
             if (response.ok) {
-                console.log('✅ 폰트 추가 성공');
                 reset();
                 setImages([]);
                 setActiveTab('basic');
                 onSuccess();
             } else {
                 const errorData = await response.json();
-                setError(errorData.error || '폰트 추가에 실패했습니다');
+                console.error(`[FontModal] ${method} 실패:`, errorData);
+                setError(errorData.error || '폰트 저장에 실패했습니다');
             }
         } catch (err) {
-            console.error('폰트 추가 에러:', err);
-            setError('폰트 추가 중 오류가 발생했습니다');
+            console.error('폰트 저장 에러:', err);
+            setError('폰트 저장 중 오류가 발생했습니다');
         } finally {
             setSubmitting(false);
         }
@@ -142,200 +170,191 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
         }
     };
 
+    const tabs = [
+        { key: 'basic' as const, label: '기본 정보' },
+        { key: 'detail' as const, label: '상세 정보' },
+        { key: 'webfont' as const, label: '웹 폰트 사용' },
+    ];
+
     return (
         <Modal isOpen={isOpen} onClose={handleClose} maxWidth="2xl" showCloseButton={false}>
-            <div className="flex flex-col h-[85dvh]">
-                {/* Fixed Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">
-                    <h2 className="text-xl font-bold text-text-primary">
-                        {isEditMode ? '폰트 편집' : '폰트 추가'}
-                    </h2>
-                    {/* X 닫기 아이콘 (PC) */}
-                    <button
-                        onClick={handleClose}
-                        className="text-text-secondary hover:text-text-primary transition-smooth p-1"
-                        aria-label="닫기"
-                    >
-                        <svg className="w-6 h-6" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                            <path d="M6 18L18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </div>
-
-                {/* Fixed Tabs */}
-                <div className="flex border-b border-border px-6 flex-shrink-0">
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('basic')}
-                        className={`px-6 py-3 font-medium transition-smooth ${activeTab === 'basic'
-                            ? 'text-primary border-b-2 border-primary'
-                            : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                    >
-                        기본 정보
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => setActiveTab('detail')}
-                        className={`px-6 py-3 font-medium transition-smooth ${activeTab === 'detail'
-                            ? 'text-primary border-b-2 border-primary'
-                            : 'text-text-secondary hover:text-text-primary'
-                            }`}
-                    >
-                        상세 정보
-                    </button>
+            <div className="w-96 md:w-[672px] max-w-full bg-white rounded-xl flex flex-col max-h-[85dvh]">
+                {/* 헤더: 제목 + 닫기 버튼 */}
+                <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+                    <div className="flex justify-between items-center">
+                        <h2 className="text-gray-900 text-lg font-semibold font-sans leading-7 line-clamp-1">
+                            {isEditMode ? '폰트 편집' : '폰트 추가'}
+                        </h2>
+                        <button
+                            onClick={handleClose}
+                            className="w-6 h-6 flex items-center justify-center text-gray-900 hover:text-gray-500 transition-colors"
+                            aria-label="닫기"
+                        >
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M1 1L11 11M1 11L11 1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col flex-1 min-h-0">
-                    {/* Scrollable Tab Content */}
-                    <div ref={contentRef} className="flex-1 overflow-y-auto p-6">
+                    {/* 탭 바 + 콘텐츠 */}
+                    <div ref={contentRef} className="px-6 pt-1.5 pb-3 flex flex-col gap-5 overflow-y-auto flex-1">
+                        {/* 탭 바 */}
+                        <div className="border-b border-gray-200 flex flex-shrink-0">
+                            {tabs.map((tab) => (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setActiveTab(tab.key)}
+                                    className={`flex-1 px-6 py-2 text-center text-sm font-sans leading-5 transition-colors ${activeTab === tab.key
+                                        ? 'border-b-2 border-primary text-primary font-semibold'
+                                        : 'text-gray-500 font-normal hover:text-gray-700'
+                                        }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* 탭1: 기본 정보 */}
                         {activeTab === 'basic' && (
-                            <div className="space-y-4">
-                                {/* 폰트 이름 */}
-                                <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-text-primary mb-1">
-                                        폰트 이름 <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        id="name"
-                                        type="text"
-                                        {...register('name')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                        placeholder="예: Noto Sans KR"
-                                    />
-                                    {errors.name && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                                    )}
+                            <div className="flex flex-col gap-5">
+                                {/* 폰트이름 + 영문명 */}
+                                <div className="flex flex-col md:flex-row gap-3 md:items-end">
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="폰트이름" required />
+                                        <input
+                                            type="text"
+                                            {...register('name')}
+                                            className={inputClass}
+                                            placeholder="예: 본고딕"
+                                        />
+                                        {errors.name && <p className="text-red-500 text-xs">{errors.name.message}</p>}
+                                    </div>
+                                    <div className="w-full md:w-48 flex flex-col gap-2">
+                                        <FieldLabel label="영문명" />
+                                        <input
+                                            type="text"
+                                            {...register('englishName')}
+                                            className={inputClass}
+                                            placeholder="예: Noto Sans"
+                                        />
+                                    </div>
                                 </div>
 
-                                {/* 디자이너 */}
-                                <div>
-                                    <label htmlFor="designer" className="block text-sm font-medium text-text-primary mb-1">
-                                        디자이너 <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        id="designer"
-                                        type="text"
-                                        {...register('designer')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                        placeholder="예: Google Fonts"
-                                    />
-                                    {errors.designer && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.designer.message}</p>
-                                    )}
-                                </div>
-
-                                {/* 제작사 */}
-                                <div>
-                                    <label htmlFor="foundry" className="block text-sm font-medium text-text-primary mb-1">
-                                        제작사 (선택)
-                                    </label>
-                                    <input
-                                        id="foundry"
-                                        type="text"
-                                        {...register('foundry')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                        placeholder="예: Google"
-                                    />
-                                </div>
-
-                                {/* 다운로드 URL */}
-                                <div>
-                                    <label htmlFor="downloadUrl" className="block text-sm font-medium text-text-primary mb-1">
-                                        다운로드 URL (선택)
-                                    </label>
-                                    <input
-                                        id="downloadUrl"
-                                        type="url"
-                                        {...register('downloadUrl')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                        placeholder="https://fonts.google.com/..."
-                                    />
-                                    {errors.downloadUrl && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.downloadUrl.message}</p>
-                                    )}
+                                {/* 디자이너 + 제작사 */}
+                                <div className="flex flex-col md:flex-row gap-3">
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="디자이너" required />
+                                        <input
+                                            type="text"
+                                            {...register('designer')}
+                                            className={inputClass}
+                                            placeholder="예: GoogleXAdobe"
+                                        />
+                                        {errors.designer && <p className="text-red-500 text-xs">{errors.designer.message}</p>}
+                                    </div>
+                                    <div className="w-full md:w-48 flex flex-col gap-2">
+                                        <FieldLabel label="제작사" />
+                                        <input
+                                            type="text"
+                                            {...register('foundry')}
+                                            className={inputClass}
+                                            placeholder="예: GoogleXAdobe"
+                                        />
+                                    </div>
                                 </div>
 
                                 {/* 공식 URL */}
-                                <div>
-                                    <label htmlFor="officialUrl" className="block text-sm font-medium text-text-primary mb-1">
-                                        공식 URL (선택)
-                                    </label>
+                                <div className="flex flex-col gap-2">
+                                    <FieldLabel label="공식 URL" />
                                     <input
-                                        id="officialUrl"
                                         type="url"
                                         {...register('officialUrl')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                        placeholder="https://..."
+                                        className={urlInputClass}
+                                        placeholder="https://fonts.google.com/specimen/Diphylleia"
                                     />
-                                    {errors.officialUrl && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.officialUrl.message}</p>
-                                    )}
+                                    {errors.officialUrl && <p className="text-red-500 text-xs">{errors.officialUrl.message}</p>}
                                 </div>
 
-                                {/* 카테고리 */}
-                                <div>
-                                    <label htmlFor="category" className="block text-sm font-medium text-text-primary mb-1">
-                                        카테고리 <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        id="category"
-                                        {...register('category')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                    >
-                                        {categoryOptions.map((option) => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.category && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
-                                    )}
+                                {/* 다운로드 URL + 굵기 */}
+                                <div className="flex flex-col md:flex-row gap-3">
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="다운로드 URL" />
+                                        <input
+                                            type="url"
+                                            {...register('downloadUrl')}
+                                            className={urlInputClass}
+                                            placeholder="http://"
+                                        />
+                                        {errors.downloadUrl && <p className="text-red-500 text-xs">{errors.downloadUrl.message}</p>}
+                                    </div>
+                                    <div className="w-full md:w-48 flex flex-col gap-2">
+                                        <FieldLabel label="굵기" required />
+                                        <input
+                                            type="number"
+                                            {...register('weightCount', { valueAsNumber: true })}
+                                            className={inputClass}
+                                            placeholder="예: 9종(숫자만 입력)"
+                                            min="1"
+                                            max="99"
+                                        />
+                                        {errors.weightCount && <p className="text-red-500 text-xs">{errors.weightCount.message}</p>}
+                                    </div>
                                 </div>
 
-                                {/* 라이선스 */}
-                                <div>
-                                    <label htmlFor="license" className="block text-sm font-medium text-text-primary mb-1">
-                                        라이선스 <span className="text-red-500">*</span>
-                                    </label>
-                                    <select
-                                        id="license"
-                                        {...register('license')}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
-                                    >
-                                        {licenseOptions.map((option) => (
-                                            <option key={option.value} value={option.value}>
-                                                {option.label}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    {errors.license && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.license.message}</p>
-                                    )}
+                                {/* 카테고리 + 파일 형식 + 라이선스 */}
+                                <div className="flex flex-col md:flex-row gap-3">
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="카테고리" required />
+                                        <select {...register('category')} className={selectClass}>
+                                            {categoryOptions.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                        {errors.category && <p className="text-red-500 text-xs">{errors.category.message}</p>}
+                                    </div>
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="파일 형식" required />
+                                        <select {...register('fontType')} className={selectClass}>
+                                            {fontTypeOptions.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <FieldLabel label="라이선스" required />
+                                        <select {...register('license')} className={selectClass}>
+                                            {licenseOptions.map((opt) => (
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            ))}
+                                        </select>
+                                        {errors.license && <p className="text-red-500 text-xs">{errors.license.message}</p>}
+                                    </div>
                                 </div>
 
                                 {/* 태그 */}
-                                <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-1">
-                                        태그
-                                    </label>
-                                    <TagInput
-                                        tags={tags}
-                                        onTagsChange={(newTags) => setValue('tags', newTags)}
-                                        placeholder="태그 입력 후 Enter (예: 한글, 무료)"
-                                    />
+                                <div className="flex flex-col gap-3">
+                                    <div className="flex flex-col gap-2">
+                                        <FieldLabel label="태그" />
+                                        <TagInput
+                                            tags={tags}
+                                            onTagsChange={(newTags) => setValue('tags', newTags)}
+                                            placeholder="태그 입력 후 Enter (예: 제목용, 본문용)"
+                                        />
+                                    </div>
                                 </div>
                             </div>
                         )}
 
+                        {/* 탭2: 상세 정보 */}
                         {activeTab === 'detail' && (
-                            <div className="space-y-4">
-                                {/* 썸네일 이미지 */}
-                                <div>
-                                    <label className="block text-sm font-medium text-text-primary mb-2">
-                                        썸네일 이미지 (선택)
-                                    </label>
+                            <div className="flex flex-col gap-5">
+
+                                {/* 이미지 업로드 */}
+                                <div className="flex flex-col gap-2">
+                                    <FieldLabel label="썸네일 이미지" />
                                     <MultiImageUpload
                                         images={images}
                                         onImagesChange={setImages}
@@ -344,77 +363,113 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                 </div>
 
                                 {/* 폰트 설명 */}
-                                <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-text-primary mb-1">
-                                        폰트 설명 (선택)
-                                    </label>
+                                <div className="flex flex-col gap-2">
+                                    <FieldLabel label="폰트 설명" />
                                     <textarea
-                                        id="description"
                                         {...register('description')}
-                                        rows={4}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth resize-none"
+                                        rows={5}
+                                        className={`${textareaClass} font-sans`}
                                         placeholder="폰트에 대한 설명을 입력해주세요"
                                     />
-                                    {errors.description && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
-                                    )}
+                                    {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
                                 </div>
 
                                 {/* 사용 노트 */}
-                                <div>
-                                    <label htmlFor="usageNotes" className="block text-sm font-medium text-text-primary mb-1">
-                                        사용 노트 (선택)
-                                    </label>
+                                <div className="flex flex-col gap-2">
+                                    <FieldLabel label="사용 노트" />
                                     <textarea
-                                        id="usageNotes"
                                         {...register('usageNotes')}
-                                        rows={4}
-                                        className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth resize-none"
+                                        rows={5}
+                                        className={`${textareaClass} font-sans`}
                                         placeholder="어떤 프로젝트에 사용했는지, 사용 팁 등"
                                     />
-                                    {errors.usageNotes && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.usageNotes.message}</p>
-                                    )}
+                                    {errors.usageNotes && <p className="text-red-500 text-xs">{errors.usageNotes.message}</p>}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* 탭3: 웹 폰트 사용 */}
+                        {activeTab === 'webfont' && (
+                            <div className="flex flex-col gap-5">
+                                {/* <link> embed */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1">
+                                        <FieldLabel label="<link>" />
+                                        <span className="text-orange-400 text-xs font-normal font-sans leading-4">
+                                            Embed code in the &lt;head&gt; of your html
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        {...register('webFontLinkEmbed')}
+                                        rows={5}
+                                        className={textareaClass}
+                                        placeholder='<link href="https://fonts.googleapis.com/..." rel="stylesheet">'
+                                    />
+                                </div>
+
+                                {/* CSS class */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1">
+                                        <FieldLabel label="<link>" />
+                                        <span className="text-orange-400 text-xs font-normal font-sans leading-4">
+                                            Font-family: CSS class
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        {...register('webFontCssClass')}
+                                        rows={5}
+                                        className={textareaClass}
+                                        placeholder={'.font-name {\n  font-family: "FontName", serif;\n  font-weight: 400;\n}'}
+                                    />
+                                </div>
+
+                                {/* @import */}
+                                <div className="flex flex-col gap-2">
+                                    <div className="flex flex-col gap-1">
+                                        <FieldLabel label="<@import>" />
+                                        <span className="text-orange-400 text-xs font-normal font-sans leading-4">
+                                            Font-family: CSS class
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        {...register('webFontImportCode')}
+                                        rows={5}
+                                        className={textareaClass}
+                                        placeholder={"@import url('https://fonts.googleapis.com/...');"}
+                                    />
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Fixed Footer */}
-                    <div
-                        className="border-t border-border px-6 py-4 flex-shrink-0"
-                        style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-                    >
-                        {/* 에러 메시지 */}
+                    {/* 하단: 에러 + 취소/추가 버튼 */}
+                    <div className="px-6 py-4 border-t border-gray-200 flex-shrink-0">
                         {error && (
-                            <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                            <div className="mb-3 bg-red-50 border border-red-200 rounded-md p-3">
                                 <p className="text-sm text-red-600">{error}</p>
                             </div>
                         )}
-
-                        {/* 버튼 (반응형) */}
-                        {/* PC: 우측 정렬, 모바일: 양측 정렬 + 전체 너비 */}
-                        <div className="flex gap-3 justify-between sm:justify-end sm:gap-3">
-                            <Button
+                        <div className="flex justify-end items-start gap-2 md:gap-3">
+                            <button
                                 type="button"
-                                variant="secondary"
                                 onClick={handleClose}
                                 disabled={submitting}
-                                className="w-full sm:w-auto"
+                                className="h-8 px-4 bg-gray-200 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors disabled:opacity-50"
                             >
-                                취소
-                            </Button>
-                            <Button
+                                <span className="text-gray-900 text-sm font-normal font-sans leading-5">취소</span>
+                            </button>
+                            <button
                                 type="submit"
-                                variant="primary"
                                 disabled={submitting}
-                                className="w-full sm:w-auto"
+                                className="h-8 px-4 bg-primary rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors disabled:opacity-50"
                             >
-                                {submitting
-                                    ? (isEditMode ? '수정 중...' : '추가 중...')
-                                    : (isEditMode ? '수정 완료' : '폰트 추가')
-                                }
-                            </Button>
+                                <span className="text-white text-xs font-bold font-sans leading-4">
+                                    {submitting
+                                        ? (isEditMode ? '수정 중...' : '추가 중...')
+                                        : (isEditMode ? '수정 완료' : '폰트 추가')
+                                    }
+                                </span>
+                            </button>
                         </div>
                     </div>
                 </form>

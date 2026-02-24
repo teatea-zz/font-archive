@@ -7,12 +7,15 @@ import { verifyAuthToken } from '@/lib/auth';
 interface DatabaseFont {
     id: string;
     name: string;
+    english_name: string | null;
     designer: string;
     foundry: string | null;
     download_url: string | null;
     official_url: string | null;
     category: string;
     license: string;
+    font_type: string | null;
+    weight_count: number | null;
     tags: string[];
     description: string | null;
     usage_notes: string | null;
@@ -22,6 +25,11 @@ interface DatabaseFont {
     updated_at: string;
     is_favorite: boolean;
     google_fonts_data: unknown;
+    web_font_snippets: {
+        link_embed?: string;
+        css_class?: string;
+        import_code?: string;
+    } | null;
 }
 
 /**

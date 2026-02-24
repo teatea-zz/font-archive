@@ -2,108 +2,108 @@
 
 import React from 'react';
 import Modal from '../ui/Modal';
-import Button from '../ui/Button';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
     onClose: () => void;
     onConfirm: () => void;
-    title: string;
-    message: string;
-    highlightText?: string;
+    title?: string;
+    fontName?: string;
+    message?: string;
     confirmText?: string;
     cancelText?: string;
-    variant?: 'danger' | 'warning' | 'info';
 }
 
+/**
+ * 폰트 삭제 확인 다이얼로그
+ * - 중앙 정렬 레이아웃: 휴지통 아이콘 → 폰트명 → 메시지
+ * - Tailwind 디자인 레퍼런스 기준
+ */
 export default function ConfirmDialog({
     isOpen,
     onClose,
     onConfirm,
-    title,
-    message,
-    highlightText,
-    confirmText = '확인',
+    title = '폰트 삭제',
+    fontName,
+    message = '이 폰트를 삭제할까요?',
+    confirmText = '삭제',
     cancelText = '취소',
-    variant = 'danger'
 }: ConfirmDialogProps) {
-    // Variant에 따른 아이콘 색상
-    const getIconColor = () => {
-        switch (variant) {
-            case 'danger':
-                return 'text-red-500';
-            case 'warning':
-                return 'text-yellow-500';
-            case 'info':
-                return 'text-blue-500';
-            default:
-                return 'text-red-500';
-        }
-    };
-
-    // Variant에 따른 버튼 색상
-    const getButtonVariant = () => {
-        switch (variant) {
-            case 'danger':
-                return 'bg-red-500 hover:bg-red-600';
-            case 'warning':
-                return 'bg-yellow-500 hover:bg-yellow-600';
-            case 'info':
-                return 'bg-blue-500 hover:bg-blue-600';
-            default:
-                return 'bg-red-500 hover:bg-red-600';
-        }
-    };
-
     const handleConfirm = () => {
         onConfirm();
         onClose();
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose} maxWidth="sm">
-            <div className="p-6">
-                {/* 제목 */}
-                <h2 className="text-xl font-bold text-text-primary mb-6">
-                    {title}
-                </h2>
-
-                {/* 아이콘 */}
-                <div className={`flex justify-center mb-6 ${getIconColor()}`}>
-                    <svg className="w-16 h-16" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                        <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+        <Modal isOpen={isOpen} onClose={onClose} maxWidth="sm" showCloseButton={false}>
+            <div className="w-96 bg-white rounded-xl inline-flex flex-col">
+                {/* 헤더: 제목 + 닫기 버튼 */}
+                <div className="px-6 py-4 flex justify-between items-center">
+                    <h2 className="text-gray-900 text-lg font-semibold font-sans leading-7 line-clamp-1">
+                        {title}
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="w-6 h-6 relative flex items-center justify-center text-gray-900 hover:text-gray-500 transition-colors"
+                        aria-label="닫기"
+                    >
+                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 1L11 11M1 11L11 1" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        </svg>
+                    </button>
                 </div>
 
-                {/* 메시지 */}
-                <div className="text-center mb-6">
-                    <p className="text-text-primary mb-3">
-                        {message}
-                    </p>
-                    {highlightText && (
-                        <p className="text-lg font-bold text-text-primary">
-                            &quot;{highlightText}&quot;
+                {/* 본문: 휴지통 아이콘 + 폰트명 + 메시지 */}
+                <div className="px-6 py-5 flex flex-col items-center gap-3">
+                    {/* 휴지통 아이콘 */}
+                    <div className="w-14 h-14 flex items-center justify-center">
+                        <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            {/* 쓰레기통 몸체 */}
+                            <rect x="4" y="10" width="32" height="30" rx="3" fill="#D6D6D6" />
+                            {/* 뚜껑 */}
+                            <rect x="2" y="6" width="36" height="6" rx="2" fill="#D6D6D6" />
+                            {/* 손잡이 */}
+                            <rect x="14" y="2" width="12" height="6" rx="2" fill="none" stroke="#D6D6D6" strokeWidth="2" />
+                            {/* 세로줄 */}
+                            <line x1="13" y1="17" x2="13" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                            <line x1="20" y1="17" x2="20" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                            <line x1="27" y1="17" x2="27" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
+                            {/* 빨간 줄 (위험 강조) */}
+                            <rect x="4" y="8" width="32" height="4" rx="1" fill="#EF4444" />
+                        </svg>
+                    </div>
+
+                    {/* 폰트명 */}
+                    {fontName && (
+                        <p className="text-center text-gray-900 text-2xl font-medium font-sans leading-7">
+                            {fontName}
                         </p>
                     )}
-                    <p className="text-sm text-text-secondary mt-3">
-                        이 작업은 되돌릴 수 없습니다.
+
+                    {/* 메시지 */}
+                    <p className="text-center text-gray-500 text-base font-medium font-sans whitespace-pre-line">
+                        {message}
+                        {'\n'}이 작업은 되돌릴 수 없습니다.
                     </p>
                 </div>
 
-                {/* 버튼 (반응형: 모바일 전체너비, PC 우측정렬) */}
-                <div className="flex gap-3 justify-between sm:justify-end">
-                    <Button
-                        variant="secondary"
+                {/* 하단: 취소 + 삭제 버튼 */}
+                <div className="px-6 py-4 flex justify-end items-start gap-2">
+                    <button
                         onClick={onClose}
-                        className="w-full sm:w-auto"
+                        className="h-8 px-4 bg-gray-200 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors"
                     >
-                        {cancelText}
-                    </Button>
+                        <span className="text-center text-gray-900 text-sm font-normal font-sans leading-5">
+                            {cancelText}
+                        </span>
+                    </button>
                     <button
                         onClick={handleConfirm}
-                        className={`px-4 py-2 rounded-lg text-white font-medium transition-smooth w-full sm:w-auto ${getButtonVariant()}`}
+                        className="h-8 px-4 bg-red-500 rounded-md flex items-center justify-center hover:bg-red-600 transition-colors"
                     >
-                        {confirmText}
+                        <span className="text-center text-white text-xs font-bold font-sans leading-4">
+                            {confirmText}
+                        </span>
                     </button>
                 </div>
             </div>

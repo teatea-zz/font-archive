@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Font } from '@/types/font';
 import Modal from '../ui/Modal';
-import Button from '../ui/Button';
 import Badge from '../ui/Badge';
 import Image from 'next/image';
 
@@ -16,6 +15,85 @@ interface FontDetailModalProps {
     onToggleFavorite: (fontId: string) => void;
 }
 
+/** 복사 버튼 상태 */
+type CopyButtonState = 'enabled' | 'hover' | 'active';
+
+/** 코드 복사 버튼 컴포넌트 */
+function CopyCodeButton({ text, onCopy }: { text: string; onCopy: () => void }) {
+    const [state, setState] = useState<CopyButtonState>('enabled');
+
+    const handleClick = async () => {
+        try {
+            await navigator.clipboard.writeText(text);
+            setState('active');
+            onCopy();
+            setTimeout(() => setState('enabled'), 2000);
+        } catch {
+            console.error('클립보드 복사 실패');
+        }
+    };
+
+    if (state === 'active') {
+        return (
+            <button
+                className="h-7 pl-1.5 pr-2 bg-[#FFF8F7] rounded-md outline outline-1 outline-offset-[-1px] outline-primary flex items-center gap-1 transition-all"
+            >
+                <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="4.4" y="3.74" width="10" height="10" rx="1" fill="#FF5429" opacity="0.5" />
+                    <rect x="2" y="1.33" width="10" height="12" rx="1" fill="#FF5429" opacity="0.5" />
+                </svg>
+                <span className="text-primary text-sm font-medium font-mono">copied!🤗</span>
+            </button>
+        );
+    }
+
+    return (
+        <button
+            onClick={handleClick}
+            onMouseEnter={() => setState('hover')}
+            onMouseLeave={() => setState('enabled')}
+            className={`h-7 pl-1.5 pr-2 bg-white rounded-md outline outline-1 outline-offset-[-1px] flex items-center gap-1 transition-all ${state === 'hover' ? 'outline-gray-500' : 'outline-gray-300'
+                }`}
+        >
+            <svg className="w-4 h-4" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4.4" y="3.74" width="10" height="10" rx="1" fill="#D6D6D6" />
+                <rect x="2" y="1.33" width="10" height="12" rx="1" fill="#EDEDED" opacity="0.5" />
+            </svg>
+            <span className="text-gray-900 text-sm font-normal font-mono">copy code</span>
+        </button>
+    );
+}
+
+/** 웹 폰트 코드 블록 컴포넌트 */
+function WebFontCodeBlock({
+    label,
+    subLabel,
+    code,
+}: {
+    label: string;
+    subLabel: string;
+    code: string;
+}) {
+    const [copied, setCopied] = useState(false);
+
+    return (
+        <div className="flex flex-col gap-2">
+            <div className="flex justify-between items-end">
+                <div className="flex flex-col gap-1">
+                    <span className="text-gray-700 text-xs font-normal font-sans leading-4">{label}</span>
+                    <span className="text-orange-400 text-xs font-normal font-sans leading-4">{subLabel}</span>
+                </div>
+                <CopyCodeButton text={code} onCopy={() => setCopied(!copied)} />
+            </div>
+            <div className="h-32 px-4 pt-4 pb-5 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 overflow-hidden">
+                <pre className="text-gray-900 text-xs font-mono leading-4 whitespace-pre-wrap break-all overflow-y-auto h-full">
+                    {code}
+                </pre>
+            </div>
+        </div>
+    );
+}
+
 export default function FontDetailModal({
     isOpen,
     onClose,
@@ -25,20 +103,22 @@ export default function FontDetailModal({
     onToggleFavorite
 }: FontDetailModalProps) {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [activeTab, setActiveTab] = useState<'info' | 'webfont'>('info');
 
-    // 폰트가 변경될 때 이미지 인덱스 초기화
+    // 폰트가 변경될 때 초기화
     React.useEffect(() => {
         setSelectedImageIndex(0);
+        setActiveTab('info');
     }, [font?.id]);
 
     if (!font) return null;
 
-    // 메인 이미지 (선택된 이미지 또는 첫 번째 이미지)
+    // 메인 이미지
     const mainImage = font.imageUrls && font.imageUrls.length > 0
         ? font.imageUrls[selectedImageIndex]
         : font.thumbnailUrl;
 
-    // 5개 썸네일 (없으면 null)
+    // 5개 썸네일
     const thumbnails = Array.from({ length: 5 }, (_, i) =>
         font.imageUrls && font.imageUrls[i] ? font.imageUrls[i] : null
     );
@@ -46,12 +126,8 @@ export default function FontDetailModal({
     // 카테고리 라벨
     const getCategoryLabel = (category: string) => {
         const labels: Record<string, string> = {
-            'gothic': '고딕',
-            'myeongjo': '명조',
-            'display': '디스플레이',
-            'handwriting': '손글씨',
-            'dingbat': '딩벳',
-            'other': '기타'
+            'gothic': '고딕', 'myeongjo': '명조', 'display': '디스플레이',
+            'handwriting': '손글씨', 'dingbat': '딩벳', 'other': '기타'
         };
         return labels[category] || category;
     };
@@ -59,226 +135,310 @@ export default function FontDetailModal({
     // 라이선스 라벨
     const getLicenseLabel = (license: string) => {
         const labels: Record<string, string> = {
-            'ofl': 'OFL',
-            'free': '무료',
-            'commercial': '상업용',
-            'personal': '개인용',
-            'apache': 'Apache',
-            'unknown': '미확인'
+            'ofl': 'OFL', 'free': '무료', 'commercial': '상업용',
+            'personal': '개인용', 'apache': 'Apache', 'unknown': '미확인'
         };
         return labels[license] || license;
     };
 
+    // 파일 형식 라벨
+    const getFontTypeLabel = (fontType?: string) => {
+        const labels: Record<string, string> = {
+            'otf_ttf': 'OTF / TTF', 'otf': 'OTF', 'ttf': 'TTF'
+        };
+        return fontType ? labels[fontType] || fontType : null;
+    };
+
+    const tabs = [
+        { key: 'info' as const, label: '폰트 정보' },
+        { key: 'webfont' as const, label: '웹 폰트 사용' },
+    ];
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} maxWidth="xl" showCloseButton={false}>
-            <div className="h-[85dvh] overflow-y-auto flex flex-col">
-                {/* 헤더 (고정) */}
-                <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-border flex items-center justify-between flex-shrink-0">
-                    <div className="flex items-center gap-3">
-                        <h2 className="text-2xl font-bold text-text-primary">
-                            {font.name}
-                        </h2>
-                        {/* 즐겨찾기 아이콘 토글 */}
-                        <button
-                            onClick={() => onToggleFavorite(font.id)}
-                            className="text-accent transition-smooth hover:scale-110"
-                            aria-label="즐겨찾기"
-                        >
-                            <svg
-                                className="w-6 h-6"
-                                fill={font.isFavorite ? 'currentColor' : 'none'}
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
+            <div className="w-96 md:w-[576px] max-w-full bg-white rounded-xl flex flex-col max-h-[85dvh]">
+                {/* 헤더: 폰트명 + 북마크 + 편집 */}
+                <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+                    <div className="flex justify-between items-center">
+                        <div className="flex-1 flex items-center gap-2 min-w-0">
+                            <h2 className="text-gray-900 text-lg font-semibold font-sans leading-7 line-clamp-1">
+                                {font.name}
+                            </h2>
+                            <button
+                                onClick={() => onToggleFavorite(font.id)}
+                                className="shrink-0 w-5 h-5 flex items-center justify-center transition-transform hover:scale-110"
+                                aria-label="즐겨찾기"
                             >
-                                <path d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-                            </svg>
+                                {font.isFavorite ? (
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M9.53125 4.72188L10 5.36875L10.4688 4.72188C11.25 3.64063 12.5062 3 13.8406 3C16.1375 3 18 4.8625 18 7.15938V7.24062C18 10.7469 13.6281 14.8188 11.3469 16.5594C10.9594 16.8531 10.4844 17 10 17C9.51562 17 9.0375 16.8563 8.65312 16.5594C6.37187 14.8188 2 10.7469 2 7.24062V7.15938C2 4.8625 3.8625 3 6.15938 3C7.49375 3 8.75 3.64063 9.53125 4.72188Z" fill="#FF5429" />
+                                    </svg>
+                                ) : (
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                        <path d="M13.8408 3.7002C15.7509 3.7003 17.2997 5.24906 17.2998 7.15918V7.24023C17.2998 8.73594 16.3466 10.4674 14.9883 12.1172C13.8203 13.5357 12.434 14.798 11.3613 15.6592L10.9219 16.0029C10.6659 16.1962 10.3432 16.2998 10 16.2998C9.6514 16.2998 9.32847 16.1969 9.08105 16.0059V16.0049L9.07812 16.0029L8.63867 15.6592C7.566 14.798 6.17968 13.5357 5.01172 12.1172C3.65338 10.4674 2.7002 8.73594 2.7002 7.24023V7.15918C2.7003 5.24906 4.24906 3.7003 6.15918 3.7002C7.26943 3.7002 8.31457 4.23321 8.96387 5.13184L8.96484 5.13281L9.43359 5.7793L10 6.56152L10.5664 5.7793L11.0352 5.13281L11.0361 5.13184C11.6854 4.23321 12.7306 3.7002 13.8408 3.7002Z" stroke="#121212" strokeWidth="1.4" />
+                                    </svg>
+                                )}
+                            </button>
+                        </div>
+                        <button
+                            onClick={() => onEdit(font)}
+                            className="text-primary text-sm font-semibold font-sans leading-5 hover:opacity-80 transition-opacity"
+                        >
+                            편집
                         </button>
                     </div>
-                    {/* 편집 버튼 (우측) */}
-                    <Button
-                        variant="ghost"
-                        onClick={() => onEdit(font)}
-                    >
-                        편집
-                    </Button>
                 </div>
 
-                {/* 콘텐츠 */}
-                <div className="px-6 py-6 flex-1 overflow-y-auto">
-                    {/* 이미지 갤러리 */}
-                    <div className="mb-8">
-                        {/* 메인 이미지 */}
-                        <div className="relative w-full aspect-[16/9] bg-background-secondary rounded-lg overflow-hidden mb-3">
-                            {mainImage ? (
-                                <Image
-                                    src={mainImage}
-                                    alt={font.name}
-                                    fill
-                                    className="object-cover"
-                                    priority
-                                    sizes="(max-width: 768px) 100vw, 800px"
-                                />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-text-secondary">
-                                    <svg className="w-16 h-16" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                            )}
-                        </div>
+                {/* 탭 바 + 콘텐츠 (스크롤 영역) */}
+                <div className="px-6 pt-1.5 pb-5 flex flex-col gap-5 overflow-y-auto flex-1">
+                    {/* 탭 바 */}
+                    <div className="border-b border-gray-200 flex">
+                        {tabs.map((tab) => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`flex-1 px-6 py-2 text-center text-sm font-sans leading-5 transition-colors ${activeTab === tab.key
+                                    ? 'border-b-2 border-primary text-primary font-semibold'
+                                    : 'text-gray-500 font-normal hover:text-gray-700'
+                                    }`}
+                            >
+                                {tab.label}
+                            </button>
+                        ))}
+                    </div>
 
-                        {/* 5개 썸네일 그리드 */}
-                        <div className="grid grid-cols-5 gap-2 sm:gap-3">
-                            {thumbnails.map((thumb, index) => (
-                                <button
-                                    key={index}
-                                    onClick={() => thumb && setSelectedImageIndex(index)}
-                                    className={`relative w-full aspect-square rounded-lg border-2 overflow-hidden transition-all ${selectedImageIndex === index && thumb
-                                        ? 'border-primary bg-primary'
-                                        : 'border-border hover:border-primary/50 bg-background-secondary'
-                                        } ${thumb ? 'cursor-pointer' : 'cursor-default'}`}
-                                    disabled={!thumb}
-                                >
-                                    {thumb ? (
+                    {/* 탭1: 폰트 정보 */}
+                    {activeTab === 'info' && (
+                        <div className="flex flex-col gap-6">
+                            {/* 이미지 갤러리 */}
+                            <div className="flex flex-col gap-3">
+                                {/* 메인 이미지 */}
+                                <div className="relative w-full aspect-[4/3] md:h-80 md:aspect-auto rounded-md outline outline-1 outline-offset-[-0.5px] outline-gray-300 overflow-hidden bg-gray-100">
+                                    {mainImage ? (
                                         <Image
-                                            src={thumb}
-                                            alt={`${font.name} ${index + 1}`}
+                                            src={mainImage}
+                                            alt={font.name}
                                             fill
-                                            className="object-cover rounded-md scale-[1.02]"
-                                            sizes="120px"
+                                            className="object-cover"
+                                            priority
+                                            sizes="(max-width: 768px) 100vw, 576px"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-background-secondary flex items-center justify-center">
-                                            <svg className="w-6 h-6 text-text-secondary/30" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div className="w-full h-full flex items-center justify-center">
+                                            <svg className="w-12 h-12 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
                                         </div>
                                     )}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
+                                </div>
+                                {/* 5개 썸네일 */}
+                                <div className="flex gap-3">
+                                    {thumbnails.map((thumb, index) => (
+                                        <button
+                                            key={index}
+                                            onClick={() => thumb && setSelectedImageIndex(index)}
+                                            className={`relative flex-1 aspect-square rounded-md outline outline-1 outline-offset-[-0.5px] outline-gray-300 overflow-hidden transition-all ${thumb ? 'cursor-pointer hover:outline-primary' : 'cursor-default bg-gray-100'
+                                                } ${selectedImageIndex === index && thumb ? 'outline-2 outline-primary' : ''}`}
+                                            disabled={!thumb}
+                                        >
+                                            {thumb ? (
+                                                <Image
+                                                    src={thumb}
+                                                    alt={`${font.name} ${index + 1}`}
+                                                    fill
+                                                    className="object-cover"
+                                                    sizes="120px"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <svg className="w-6 h-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path d="M12 4v16m8-8H4" />
+                                                    </svg>
+                                                </div>
+                                            )}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
 
-                    {/* 폰트 정보 */}
-                    <section className="mb-6">
-                        <h3 className="text-lg font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                            폰트 정보
-                        </h3>
-                        <dl className="space-y-2">
-                            <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                <dt className="text-sm font-medium text-text-secondary sm:w-24">디자이너:</dt>
-                                <dd className="text-sm text-text-primary">{font.designer}</dd>
-                            </div>
-                            {font.foundry && (
-                                <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                    <dt className="text-sm font-medium text-text-secondary sm:w-24">제작사:</dt>
-                                    <dd className="text-sm text-text-primary">{font.foundry}</dd>
+                            {/* 폰트 기본 정보 row */}
+                            <div className="pt-5 border-t border-gray-200 flex justify-between items-center overflow-hidden">
+                                <div className="flex-1 flex items-center gap-2 min-w-0">
+                                    <span className="text-gray-900 text-base font-medium font-sans">{font.name}</span>
+                                    {font.englishName && (
+                                        <span className="text-gray-700 text-xs font-normal font-mono leading-4">{font.englishName}</span>
+                                    )}
                                 </div>
-                            )}
-                            <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                <dt className="text-sm font-medium text-text-secondary sm:w-24">카테고리:</dt>
-                                <dd>
-                                    <Badge label={getCategoryLabel(font.category)} variant="category" />
-                                </dd>
+                                <div className="flex items-center gap-4">
+                                    {getFontTypeLabel(font.fontType) && (
+                                        <span className="text-gray-700 text-xs font-normal font-mono leading-4">
+                                            {getFontTypeLabel(font.fontType)}
+                                        </span>
+                                    )}
+                                    {font.weightCount && (
+                                        <div className="flex items-center">
+                                            <span className="text-gray-700 text-xs font-normal font-sans leading-4">글꼴</span>
+                                            <span className="text-gray-700 text-xs font-normal font-mono leading-4">{font.weightCount}</span>
+                                            <span className="text-gray-700 text-xs font-normal font-sans leading-4">종</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                            <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                <dt className="text-sm font-medium text-text-secondary sm:w-24">라이선스:</dt>
-                                <dd>
+
+                            {/* 배지 */}
+                            <div className="flex flex-col gap-5">
+                                <div className="flex items-center gap-2">
                                     <Badge label={getLicenseLabel(font.license)} variant="license" />
-                                </dd>
-                            </div>
-                            {font.downloadUrl && (
-                                <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                    <dt className="text-sm font-medium text-text-secondary sm:w-24">다운로드:</dt>
-                                    <dd>
-                                        <a
-                                            href={font.downloadUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-primary hover:underline break-all"
-                                        >
-                                            {font.downloadUrl}
-                                        </a>
-                                    </dd>
+                                    <Badge label={getCategoryLabel(font.category)} variant="category" />
                                 </div>
-                            )}
-                            {font.officialUrl && (
-                                <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                    <dt className="text-sm font-medium text-text-secondary sm:w-24">공식 사이트:</dt>
-                                    <dd>
-                                        <a
-                                            href={font.officialUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-sm text-primary hover:underline break-all"
-                                        >
-                                            {font.officialUrl}
-                                        </a>
-                                    </dd>
+
+                                {/* 디자이너 / 제작사 */}
+                                <div className="flex flex-col gap-6">
+                                    <div className="flex gap-4">
+                                        <div className="flex-1 flex flex-col gap-1 overflow-hidden">
+                                            <span className="text-gray-500 text-sm font-medium font-sans">디자이너</span>
+                                            <span className="text-gray-900 text-base font-medium font-sans">{font.designer}</span>
+                                        </div>
+                                        {font.foundry && (
+                                            <div className="flex-1 flex flex-col gap-1 overflow-hidden">
+                                                <span className="text-gray-500 text-sm font-medium font-sans">제작사</span>
+                                                <span className="text-gray-900 text-base font-medium font-sans">{font.foundry}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 다운로드 URL */}
+                                    {font.downloadUrl && (
+                                        <div className="flex flex-col gap-1 overflow-hidden">
+                                            <span className="text-gray-500 text-sm font-medium font-sans">다운로드</span>
+                                            <a
+                                                href={font.downloadUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary text-xs font-normal font-mono leading-4 hover:underline truncate"
+                                            >
+                                                {font.downloadUrl}
+                                            </a>
+                                        </div>
+                                    )}
+
+                                    {/* 공식 사이트 */}
+                                    {font.officialUrl && (
+                                        <div className="flex flex-col gap-1 overflow-hidden">
+                                            <span className="text-gray-500 text-sm font-medium font-sans">공식 사이트</span>
+                                            <a
+                                                href={font.officialUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-primary text-xs font-normal font-mono leading-4 hover:underline truncate"
+                                            >
+                                                {font.officialUrl}
+                                            </a>
+                                        </div>
+                                    )}
                                 </div>
-                            )}
-                            {/* 태그를 폰트 정보 안에 통합 */}
-                            {font.tags && font.tags.length > 0 && (
-                                <div className="flex flex-col sm:flex-row sm:gap-2 sm:items-center">
-                                    <dt className="text-sm font-medium text-text-secondary sm:w-24">태그:</dt>
-                                    <dd className="flex flex-wrap gap-2">
+
+                                {/* 태그 */}
+                                {font.tags && font.tags.length > 0 && (
+                                    <div className="flex flex-wrap gap-1 content-start overflow-hidden">
                                         {font.tags.map((tag, index) => (
                                             <Badge key={index} label={`#${tag}`} variant="tag" />
                                         ))}
-                                    </dd>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 폰트 설명 */}
+                            {font.description && (
+                                <div className="flex flex-col gap-2">
+                                    <div className="pt-5 border-t border-gray-200">
+                                        <span className="text-gray-500 text-base font-medium font-sans">폰트 설명</span>
+                                    </div>
+                                    <p className="text-gray-900 text-sm font-medium font-sans leading-6 whitespace-pre-wrap">
+                                        {font.description}
+                                    </p>
                                 </div>
                             )}
-                        </dl>
-                    </section>
 
-                    {/* 설명 (조건부) */}
-                    {font.description && (
-                        <section className="mb-6">
-                            <h3 className="text-lg font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                                설명
-                            </h3>
-                            <p className="text-sm text-text-primary whitespace-pre-wrap">
-                                {font.description}
-                            </p>
-                        </section>
+                            {/* 사용 노트 */}
+                            {font.usageNotes && (
+                                <div className="flex flex-col gap-2">
+                                    <div className="pt-5 border-t border-gray-200">
+                                        <span className="text-gray-500 text-base font-medium font-sans">사용 노트</span>
+                                    </div>
+                                    <p className="text-gray-900 text-sm font-medium font-sans leading-6 whitespace-pre-wrap">
+                                        {font.usageNotes}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
                     )}
 
-                    {/* 사용 노트 (조건부) */}
-                    {font.usageNotes && (
-                        <section className="mb-6">
-                            <h3 className="text-lg font-bold text-text-primary mb-3 pb-2 border-b border-border">
-                                사용 노트
-                            </h3>
-                            <p className="text-sm text-text-primary whitespace-pre-wrap">
-                                {font.usageNotes}
-                            </p>
-                        </section>
+                    {/* 탭2: 웹 폰트 사용 */}
+                    {activeTab === 'webfont' && (
+                        <div className="flex flex-col gap-5">
+                            {font.webFontSnippets?.linkEmbed ? (
+                                <WebFontCodeBlock
+                                    label="<link>"
+                                    subLabel="Embed code in the <head> of your html"
+                                    code={font.webFontSnippets.linkEmbed}
+                                />
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-gray-700 text-xs font-normal font-sans leading-4">&lt;link&gt;</span>
+                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                        <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {font.webFontSnippets?.cssClass ? (
+                                <WebFontCodeBlock
+                                    label="<link>"
+                                    subLabel="Font-family: CSS class"
+                                    code={font.webFontSnippets.cssClass}
+                                />
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-gray-700 text-xs font-normal font-sans leading-4">Font-family: CSS class</span>
+                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                        <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {font.webFontSnippets?.importCode ? (
+                                <WebFontCodeBlock
+                                    label="<@import>"
+                                    subLabel="Font-family: CSS class"
+                                    code={font.webFontSnippets.importCode}
+                                />
+                            ) : (
+                                <div className="flex flex-col gap-2">
+                                    <span className="text-gray-700 text-xs font-normal font-sans leading-4">&lt;@import&gt;</span>
+                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                        <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
                 </div>
 
-                {/* 하단 버튼 (반응형 + Safe Area) */}
-                <div
-                    className="bg-white border-t border-border px-6 py-4 flex-shrink-0"
-                    style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}
-                >
-                    {/* PC: 우측 정렬, 모바일: 양측 정렬 + 전체 너비 */}
-                    <div className="flex gap-3 justify-between sm:justify-end sm:gap-3">
-                        {/* 삭제 버튼 (배경색만 커스텀) */}
-                        <Button
-                            onClick={() => onDelete(font)}
-                            variant="secondary"
-                            className="w-full sm:w-auto !bg-gray-100 !text-gray-700 hover:!bg-red-500 hover:!text-white"
-                        >
-                            삭제
-                        </Button>
-                        {/* 닫기 버튼 */}
-                        <Button variant="secondary" onClick={onClose} className="w-full sm:w-auto">
-                            닫기
-                        </Button>
-                    </div>
+                {/* 하단: 삭제 + 닫기 */}
+                <div className="border-t border-gray-200 px-6 py-4 flex justify-end items-start gap-2 flex-shrink-0">
+                    <button
+                        onClick={() => onDelete(font)}
+                        className="h-8 px-4 bg-primary rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors"
+                    >
+                        <span className="text-center text-white text-xs font-bold font-sans leading-4">삭제</span>
+                    </button>
+                    <button
+                        onClick={onClose}
+                        className="h-8 px-4 bg-gray-200 rounded-md flex items-center justify-center hover:bg-gray-300 transition-colors"
+                    >
+                        <span className="text-center text-gray-900 text-sm font-normal font-sans leading-5">닫기</span>
+                    </button>
                 </div>
             </div>
         </Modal>

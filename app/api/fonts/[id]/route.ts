@@ -7,12 +7,15 @@ import { verifyAuthToken } from '@/lib/auth';
 interface DatabaseFont {
     id: string;
     name: string;
+    english_name: string | null;
     designer: string;
     foundry: string | null;
     download_url: string | null;
     official_url: string | null;
     category: string;
     license: string;
+    font_type: string | null;
+    weight_count: number | null;
     tags: string[];
     description: string | null;
     usage_notes: string | null;
@@ -22,6 +25,11 @@ interface DatabaseFont {
     updated_at: string;
     is_favorite: boolean;
     google_fonts_data: unknown;
+    web_font_snippets: {
+        link_embed?: string;
+        css_class?: string;
+        import_code?: string;
+    } | null;
 }
 
 /**
@@ -79,10 +87,28 @@ export async function PUT(
 
         const body = await request.json();
 
+        // 허용된 필드만 추출 (Supabase 컬럼과 일치)
+        const allowedFields = [
+            'name', 'english_name', 'designer', 'foundry',
+            'download_url', 'official_url', 'category', 'license',
+            'font_type', 'weight_count', 'tags',
+            'description', 'usage_notes',
+            'image_urls', 'thumbnail_url',
+            'is_favorite', 'web_font_snippets',
+        ];
+        const updateData: Record<string, unknown> = {};
+        for (const key of allowedFields) {
+            if (key in body) {
+                updateData[key] = body[key];
+            }
+        }
+
+        console.log('📝 폰트 수정 요청:', params.id, JSON.stringify(updateData, null, 2));
+
         const { data, error } = await supabaseAdmin
             .from('fonts')
             // @ts-expect-error: Supabase client cannot infer 'fonts' table schema correctly, resulting in 'never' type for update input.
-            .update(body)
+            .update(updateData)
             .eq('id', params.id)
             .select()
             .single();

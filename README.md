@@ -4,6 +4,6 @@
 
 Tech Stack: Next.js, Supabase, Tailwind CSS.
 
-**버전**: v2.0 (Phase 2 완료)  
-**마지막 업데이트**: 2026-02-23  
-**Phase 1 업데이트**: Auth 페이지 UI/UX 고도화
+**버전**: v2.2 (Phase 3 완료)  
+**마지막 업데이트**: 2026-02-25  
+**Phase 3 업데이트**: 모달 UI 개선 및 모바일 반응형 적용

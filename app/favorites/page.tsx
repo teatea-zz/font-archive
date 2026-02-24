@@ -40,12 +40,15 @@ export default function FavoritesPage() {
                 interface DatabaseFont {
                     id: string;
                     name: string;
+                    english_name: string | null;
                     designer: string;
                     foundry: string | null;
                     download_url: string | null;
                     official_url: string | null;
                     category: string;
                     license: string;
+                    font_type: string | null;
+                    weight_count: number | null;
                     tags: string[];
                     description: string | null;
                     usage_notes: string | null;
@@ -55,17 +58,25 @@ export default function FavoritesPage() {
                     updated_at: string;
                     is_favorite: boolean;
                     google_fonts_data: unknown;
+                    web_font_snippets: {
+                        link_embed?: string;
+                        css_class?: string;
+                        import_code?: string;
+                    } | null;
                 }
 
                 const transformedData: Font[] = data.map((item: DatabaseFont) => ({
                     id: item.id,
                     name: item.name,
+                    englishName: item.english_name,
                     designer: item.designer,
                     foundry: item.foundry,
                     downloadUrl: item.download_url,
                     officialUrl: item.official_url,
                     category: item.category,
                     license: item.license,
+                    fontType: item.font_type,
+                    weightCount: item.weight_count,
                     tags: item.tags,
                     description: item.description,
                     usageNotes: item.usage_notes,
@@ -75,6 +86,11 @@ export default function FavoritesPage() {
                     updatedAt: item.updated_at,
                     isFavorite: item.is_favorite,
                     googleFontsData: item.google_fonts_data,
+                    webFontSnippets: item.web_font_snippets ? {
+                        linkEmbed: item.web_font_snippets.link_embed,
+                        cssClass: item.web_font_snippets.css_class,
+                        importCode: item.web_font_snippets.import_code,
+                    } : undefined,
                 }));
                 // 즐겨찾기만 필터링 (API에서 필터링 지원하면 좋겠지만 일단 클라이언트에서)
                 setFonts(transformedData.filter((font: Font) => font.isFavorite));
@@ -257,7 +273,7 @@ export default function FavoritesPage() {
 
             <TabbedAddFontModal isOpen={isAddModalOpen} onClose={() => { setIsAddModalOpen(false); setEditingFont(null); }} onSuccess={handleFontAdded} editFont={editingFont} />
             <FontDetailModal isOpen={isDetailModalOpen} onClose={() => setIsDetailModalOpen(false)} font={selectedFont} onEdit={handleEdit} onDelete={handleDeleteClick} onToggleFavorite={handleToggleFavorite} />
-            <ConfirmDialog isOpen={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} onConfirm={handleDeleteConfirm} title="폰트 삭제" message="정말로 이 폰트를 삭제하시겠습니까?" highlightText={selectedFont?.name} confirmText="삭제" cancelText="취소" variant="danger" />
+            <ConfirmDialog isOpen={isDeleteDialogOpen} onClose={() => setIsDeleteDialogOpen(false)} onConfirm={handleDeleteConfirm} title="폰트 삭제" message="이 폰트를 삭제할까요?" fontName={selectedFont?.name} confirmText="삭제" cancelText="취소" />
 
             <CompareBar onOpenOverlay={() => setIsComparisonOpen(true)} />
             <ComparisonOverlay isOpen={isComparisonOpen} onClose={() => setIsComparisonOpen(false)} onToggleFavorite={handleToggleFavorite} />

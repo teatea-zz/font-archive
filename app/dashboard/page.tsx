@@ -40,12 +40,15 @@ export default function DashboardPage() {
                 interface DatabaseFont {
                     id: string;
                     name: string;
+                    english_name: string | null;
                     designer: string;
                     foundry: string | null;
                     download_url: string | null;
                     official_url: string | null;
                     category: string;
                     license: string;
+                    font_type: string | null;
+                    weight_count: number | null;
                     tags: string[];
                     description: string | null;
                     usage_notes: string | null;
@@ -55,18 +58,26 @@ export default function DashboardPage() {
                     updated_at: string;
                     is_favorite: boolean;
                     google_fonts_data: unknown;
+                    web_font_snippets: {
+                        link_embed?: string;
+                        css_class?: string;
+                        import_code?: string;
+                    } | null;
                 }
 
                 // DB 컬럼명(snake_case)을 Font 타입(camelCase)으로 변환
                 const transformedData: Font[] = data.map((item: DatabaseFont) => ({
                     id: item.id,
                     name: item.name,
+                    englishName: item.english_name,
                     designer: item.designer,
                     foundry: item.foundry,
                     downloadUrl: item.download_url,
                     officialUrl: item.official_url,
                     category: item.category,
                     license: item.license,
+                    fontType: item.font_type,
+                    weightCount: item.weight_count,
                     tags: item.tags,
                     description: item.description,
                     usageNotes: item.usage_notes,
@@ -76,6 +87,11 @@ export default function DashboardPage() {
                     updatedAt: item.updated_at,
                     isFavorite: item.is_favorite,
                     googleFontsData: item.google_fonts_data,
+                    webFontSnippets: item.web_font_snippets ? {
+                        linkEmbed: item.web_font_snippets.link_embed,
+                        cssClass: item.web_font_snippets.css_class,
+                        importCode: item.web_font_snippets.import_code,
+                    } : undefined,
                 }));
                 setFonts(transformedData);
             } else {
@@ -302,11 +318,10 @@ export default function DashboardPage() {
                 onClose={() => setIsDeleteDialogOpen(false)}
                 onConfirm={handleDeleteConfirm}
                 title="폰트 삭제"
-                message="정말로 이 폰트를 삭제하시겠습니까?"
-                highlightText={selectedFont?.name}
+                message="이 폰트를 삭제할까요?"
+                fontName={selectedFont?.name}
                 confirmText="삭제"
                 cancelText="취소"
-                variant="danger"
             />
 
             {/* 비교하기 바 (클릭 전파 방지) */}
