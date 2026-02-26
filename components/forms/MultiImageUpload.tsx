@@ -123,10 +123,15 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                                             e.stopPropagation();
                                             handleRemoveImage(slotIndex);
                                         }}
-                                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-smooth shadow-md"
+                                        className="absolute top-[4px] right-[4px] w-5 h-5 flex items-center justify-center hover:opacity-80 transition-smooth"
                                         aria-label="이미지 삭제"
                                     >
-                                        ×
+                                        <Image
+                                            src="/images/ComparisonOverlay/icon/close-btn-thumnail.svg"
+                                            alt="삭제"
+                                            width={20}
+                                            height={20}
+                                        />
                                     </button>
                                 </>
                             ) : isUploading ? (
@@ -137,17 +142,12 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                             ) : (
                                 // 빈 슬롯 ([+] 아이콘)
                                 <div className="absolute inset-0 flex items-center justify-center text-text-secondary">
-                                    <svg
-                                        className="w-8 h-8"
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path d="M12 4v16m8-8H4" />
-                                    </svg>
+                                    <Image
+                                        src="/images/FontDetailModal/img_add.svg"
+                                        alt="이미지 추가"
+                                        width={24}
+                                        height={24}
+                                    />
                                 </div>
                             )}
                         </div>

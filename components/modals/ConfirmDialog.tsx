@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Modal from '../ui/Modal';
+import Image from 'next/image';
 
 interface ConfirmDialogProps {
     isOpen: boolean;
@@ -36,7 +37,7 @@ export default function ConfirmDialog({
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} maxWidth="sm" showCloseButton={false}>
-            <div className="w-96 bg-white rounded-xl inline-flex flex-col">
+            <div className="w-full sm:w-96 max-w-full bg-white rounded-xl flex flex-col">
                 {/* 헤더: 제목 + 닫기 버튼 */}
                 <div className="px-6 py-4 flex justify-between items-center">
                     <h2 className="text-gray-900 text-lg font-semibold font-sans leading-7 line-clamp-1">
@@ -57,20 +58,12 @@ export default function ConfirmDialog({
                 <div className="px-6 py-5 flex flex-col items-center gap-3">
                     {/* 휴지통 아이콘 */}
                     <div className="w-14 h-14 flex items-center justify-center">
-                        <svg width="40" height="44" viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            {/* 쓰레기통 몸체 */}
-                            <rect x="4" y="10" width="32" height="30" rx="3" fill="#D6D6D6" />
-                            {/* 뚜껑 */}
-                            <rect x="2" y="6" width="36" height="6" rx="2" fill="#D6D6D6" />
-                            {/* 손잡이 */}
-                            <rect x="14" y="2" width="12" height="6" rx="2" fill="none" stroke="#D6D6D6" strokeWidth="2" />
-                            {/* 세로줄 */}
-                            <line x1="13" y1="17" x2="13" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            <line x1="20" y1="17" x2="20" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            <line x1="27" y1="17" x2="27" y2="33" stroke="white" strokeWidth="2" strokeLinecap="round" />
-                            {/* 빨간 줄 (위험 강조) */}
-                            <rect x="4" y="8" width="32" height="4" rx="1" fill="#EF4444" />
-                        </svg>
+                        <Image
+                            src="/images/ConfirmDialog/icon_trash.svg"
+                            alt="삭제"
+                            width={56}
+                            height={56}
+                        />
                     </div>
 
                     {/* 폰트명 */}
@@ -101,7 +94,7 @@ export default function ConfirmDialog({
                         onClick={handleConfirm}
                         className="h-8 px-4 bg-red-500 rounded-md flex items-center justify-center hover:bg-red-600 transition-colors"
                     >
-                        <span className="text-center text-white text-xs font-bold font-sans leading-4">
+                        <span className="text-center text-white text-sm font-bold font-sans leading-4">
                             {confirmText}
                         </span>
                     </button>

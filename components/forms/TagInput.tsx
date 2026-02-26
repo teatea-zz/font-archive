@@ -40,7 +40,7 @@ export default function TagInput({ tags, onTagsChange, placeholder = '태그 입
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
                     placeholder={placeholder}
-                    className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
+                    className="w-full rounded-lg border border-border bg-white px-4 py-2 text-text-primary placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-smooth"
                 />
                 {input.trim() && (
                     <button

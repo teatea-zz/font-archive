@@ -9,6 +9,7 @@ import TabbedAddFontModal from '@/components/modals/TabbedAddFontModal';
 import FontDetailModal from '@/components/modals/FontDetailModal';
 import ConfirmDialog from '@/components/modals/ConfirmDialog';
 import FloatingAddButton from '@/components/ui/FloatingAddButton';
+import SortDropdown from '@/components/ui/SortDropdown';
 import CompareBar from '@/components/comparison/CompareBar';
 import ComparisonOverlay from '@/components/modals/ComparisonOverlay';
 import { useCompareStore } from '@/store/compareStore';
@@ -275,16 +276,15 @@ export default function DashboardPage() {
             <FilterBar
                 selectedCategory={selectedCategory}
                 onCategoryChange={setSelectedCategory}
-                sortBy={sortBy}
-                onSortChange={setSortBy}
             />
 
-            <main className="max-w-7xl mx-auto px-6 pt-6 pb-10">
-                <div className="mb-6">
-                    <p className="text-text-secondary">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[14px] pb-[56px]">
+                <div className="mb-4 flex items-center justify-between">
+                    <p className="text-text-secondary text-sm font-medium">
                         <span style={{ fontFamily: "'Roboto Mono', monospace" }} className="font-bold">{filteredAndSortedFonts.length}</span>개의 폰트
                         {searchQuery && ` (검색: "${searchQuery}")`}
                     </p>
+                    <SortDropdown sortBy={sortBy} onSortChange={setSortBy} />
                 </div>
 
                 <FontGrid

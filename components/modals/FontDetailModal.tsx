@@ -78,14 +78,14 @@ function WebFontCodeBlock({
 
     return (
         <div className="flex flex-col gap-2">
-            <div className="flex justify-between items-end">
-                <div className="flex flex-col gap-1">
-                    <span className="text-gray-700 text-xs font-normal font-sans leading-4">{label}</span>
-                    <span className="text-orange-400 text-xs font-normal font-sans leading-4">{subLabel}</span>
+            <div className="flex justify-between items-end gap-2">
+                <div className="flex-1 min-w-0 flex flex-col gap-1 pr-2">
+                    <span className="text-gray-700 text-xs font-normal font-sans leading-4 break-words">{label}</span>
+                    <span className="text-orange-400 text-xs font-normal font-sans leading-4 break-words whitespace-normal">{subLabel}</span>
                 </div>
                 <CopyCodeButton text={code} onCopy={() => setCopied(!copied)} />
             </div>
-            <div className="h-32 px-4 pt-4 pb-5 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 overflow-hidden">
+            <div className="h-32 p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 overflow-hidden">
                 <pre className="text-gray-900 text-xs font-mono leading-4 whitespace-pre-wrap break-all overflow-y-auto h-full">
                     {code}
                 </pre>
@@ -105,11 +105,13 @@ export default function FontDetailModal({
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
     const [activeTab, setActiveTab] = useState<'info' | 'webfont'>('info');
 
-    // 폰트가 변경될 때 초기화
+    // 모달이 열리거나 폰트가 변경될 때 초기화
     React.useEffect(() => {
-        setSelectedImageIndex(0);
-        setActiveTab('info');
-    }, [font?.id]);
+        if (isOpen) {
+            setSelectedImageIndex(0);
+            setActiveTab('info');
+        }
+    }, [font?.id, isOpen]);
 
     if (!font) return null;
 
@@ -148,6 +150,9 @@ export default function FontDetailModal({
         };
         return fontType ? labels[fontType] || fontType : null;
     };
+
+    // Whether webfont snippets exist
+    const hasWebFontData = !!(font.webFontSnippets?.linkEmbed || font.webFontSnippets?.cssClass || font.webFontSnippets?.importCode);
 
     const tabs = [
         { key: 'info' as const, label: '폰트 정보' },
@@ -197,12 +202,18 @@ export default function FontDetailModal({
                             <button
                                 key={tab.key}
                                 onClick={() => setActiveTab(tab.key)}
-                                className={`flex-1 px-6 py-2 text-center text-sm font-sans leading-5 transition-colors ${activeTab === tab.key
+                                className={`flex-1 px-6 py-2 text-center text-sm font-sans leading-5 transition-colors flex items-center justify-center gap-1 ${activeTab === tab.key
                                     ? 'border-b-2 border-primary text-primary font-semibold'
                                     : 'text-gray-500 font-normal hover:text-gray-700'
                                     }`}
                             >
                                 {tab.label}
+                                {tab.key === 'webfont' && hasWebFontData && (
+                                    <svg width="28" height="16" viewBox="0 0 28 16" fill="none" className="inline-block">
+                                        <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                        <path d="M18 12L22 8L18 4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
+                                )}
                             </button>
                         ))}
                     </div>
@@ -213,7 +224,7 @@ export default function FontDetailModal({
                             {/* 이미지 갤러리 */}
                             <div className="flex flex-col gap-3">
                                 {/* 메인 이미지 */}
-                                <div className="relative w-full aspect-[4/3] md:h-80 md:aspect-auto rounded-md outline outline-1 outline-offset-[-0.5px] outline-gray-300 overflow-hidden bg-gray-100">
+                                <div className="relative w-full h-44 md:h-80 rounded-md outline outline-1 outline-offset-[-0.5px] outline-gray-300 overflow-hidden bg-gray-100">
                                     {mainImage ? (
                                         <Image
                                             src={mainImage}
@@ -225,8 +236,8 @@ export default function FontDetailModal({
                                         />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center">
-                                            <svg className="w-12 h-12 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M8 32L17.172 22.828C17.9221 22.0781 18.9393 21.6569 20 21.6569C21.0607 21.6569 22.0779 22.0781 22.828 22.828L32 32M28 28L31.172 24.828C31.9221 24.0781 32.9393 23.6569 34 23.6569C35.0607 23.6569 36.0779 24.0781 36.828 24.828L40 28M28 16H28.02M12 40H36C37.0609 40 38.0783 39.5786 38.8284 38.8284C39.5786 38.0783 40 37.0609 40 36V12C40 10.9391 39.5786 9.92172 38.8284 9.17157C38.0783 8.42143 37.0609 8 36 8H12C10.9391 8 9.92172 8.42143 9.17157 9.17157C8.42143 9.92172 8 10.9391 8 12V36C8 37.0609 8.42143 38.0783 9.17157 38.8284C9.92172 39.5786 10.9391 40 12 40Z" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                             </svg>
                                         </div>
                                     )}
@@ -251,8 +262,8 @@ export default function FontDetailModal({
                                                 />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center">
-                                                    <svg className="w-6 h-6 text-gray-400" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path d="M12 4v16m8-8H4" />
+                                                    <svg width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M8 32L17.172 22.828C17.9221 22.0781 18.9393 21.6569 20 21.6569C21.0607 21.6569 22.0779 22.0781 22.828 22.828L32 32M28 28L31.172 24.828C31.9221 24.0781 32.9393 23.6569 34 23.6569C35.0607 23.6569 36.0779 24.0781 36.828 24.828L40 28M28 16H28.02M12 40H36C37.0609 40 38.0783 39.5786 38.8284 38.8284C39.5786 38.0783 40 37.0609 40 36V12C40 10.9391 39.5786 9.92172 38.8284 9.17157C38.0783 8.42143 37.0609 8 36 8H12C10.9391 8 9.92172 8.42143 9.17157 9.17157C8.42143 9.92172 8 10.9391 8 12V36C8 37.0609 8.42143 38.0783 9.17157 38.8284C9.92172 39.5786 10.9391 40 12 40Z" stroke="#BDBDBD" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                                     </svg>
                                                 </div>
                                             )}
@@ -294,7 +305,7 @@ export default function FontDetailModal({
 
                                 {/* 디자이너 / 제작사 */}
                                 <div className="flex flex-col gap-6">
-                                    <div className="flex gap-4">
+                                    <div className="flex flex-col md:flex-row gap-4">
                                         <div className="flex-1 flex flex-col gap-1 overflow-hidden">
                                             <span className="text-gray-500 text-sm font-medium font-sans">디자이너</span>
                                             <span className="text-gray-900 text-base font-medium font-sans">{font.designer}</span>
@@ -386,7 +397,7 @@ export default function FontDetailModal({
                             ) : (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-gray-700 text-xs font-normal font-sans leading-4">&lt;link&gt;</span>
-                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                    <div className="h-32 p-3 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
                                         <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
                                     </div>
                                 </div>
@@ -401,7 +412,7 @@ export default function FontDetailModal({
                             ) : (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-gray-700 text-xs font-normal font-sans leading-4">Font-family: CSS class</span>
-                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                    <div className="h-32 p-3 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
                                         <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
                                     </div>
                                 </div>
@@ -410,13 +421,13 @@ export default function FontDetailModal({
                             {font.webFontSnippets?.importCode ? (
                                 <WebFontCodeBlock
                                     label="<@import>"
-                                    subLabel="Font-family: CSS class"
+                                    subLabel="Embed code in the &lt;head&gt; of your html"
                                     code={font.webFontSnippets.importCode}
                                 />
                             ) : (
                                 <div className="flex flex-col gap-2">
                                     <span className="text-gray-700 text-xs font-normal font-sans leading-4">&lt;@import&gt;</span>
-                                    <div className="h-32 px-4 pt-4 pb-5 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
+                                    <div className="h-32 p-3 bg-gray-50 rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 flex items-center justify-center">
                                         <span className="text-gray-400 text-sm font-sans">등록된 코드가 없습니다</span>
                                     </div>
                                 </div>
@@ -431,7 +442,7 @@ export default function FontDetailModal({
                         onClick={() => onDelete(font)}
                         className="h-8 px-4 bg-primary rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors"
                     >
-                        <span className="text-center text-white text-xs font-bold font-sans leading-4">삭제</span>
+                        <span className="text-center text-white text-sm font-bold font-sans leading-4">삭제</span>
                     </button>
                     <button
                         onClick={onClose}

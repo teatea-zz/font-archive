@@ -21,7 +21,10 @@ type Tab = 'basic' | 'detail' | 'webfont';
 const inputClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-base font-normal font-sans leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors";
 const urlInputClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-xs font-normal font-mono leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors";
 const selectClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-base font-normal font-sans leading-4 focus:outline-primary focus:outline-2 transition-colors";
-const textareaClass = "w-full p-3 bg-white rounded-md outline outline-1 outline-offset-[-1px] outline-gray-300 text-gray-900 text-sm font-normal font-mono leading-4 placeholder:text-gray-400 focus:outline-primary focus:outline-2 transition-colors resize-none";
+// 모달 내부용 기본 인풋/텍스트에리어 스타일
+const baseInputClass = "w-full border border-gray-300 rounded-md px-3 py-[10px] bg-white text-gray-900 text-sm font-normal font-sans leading-tight focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400";
+const textareaClass = "w-full border border-gray-300 rounded-md px-3 py-3 bg-white text-gray-900 text-sm font-medium font-sans leading-6 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400 resize-none";
+const webfontTextareaClass = "w-full border border-gray-300 rounded-md px-3 py-3 bg-white text-gray-900 text-xs font-mono leading-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary placeholder:text-gray-400 resize-none";
 
 /** 필드 라벨 컴포넌트 */
 function FieldLabel({ label, required = false }: { label: string; required?: boolean }) {
@@ -33,12 +36,106 @@ function FieldLabel({ label, required = false }: { label: string; required?: boo
     );
 }
 
+/** 커스텀 셀렉트 드롭다운 (FilterBar 정렬 드롭다운 스타일) */
+function CustomSelect({
+    value,
+    onChange,
+    options,
+    isOpen,
+    onToggle,
+    dropdownId,
+}: {
+    value: string;
+    onChange: (val: string) => void;
+    options: readonly { value: string; label: string }[];
+    isOpen: boolean;
+    onToggle: (id: string) => void;
+    dropdownId: string;
+}) {
+    const ref = React.useRef<HTMLDivElement>(null);
+    const currentLabel = options.find((o) => o.value === value)?.label ?? '';
+
+    React.useEffect(() => {
+        const handler = (e: MouseEvent) => {
+            if (ref.current && !ref.current.contains(e.target as Node)) {
+                if (isOpen) onToggle('');
+            }
+        };
+        document.addEventListener('mousedown', handler);
+        return () => document.removeEventListener('mousedown', handler);
+    }, [isOpen, onToggle]);
+
+    return (
+        <div className="relative" ref={ref}>
+            <button
+                type="button"
+                onClick={() => onToggle(isOpen ? '' : dropdownId)}
+                className={`
+                    flex items-center justify-between w-full px-3 h-[42px]
+                    text-sm text-[#121212] font-normal font-sans
+                    transition-all duration-150
+                    ${isOpen
+                        ? 'bg-white border border-[#D6D6D6] rounded-b-xl rounded-t-none'
+                        : 'bg-[#F5F5F5] rounded-xl border border-transparent hover:border-[#D6D6D6]'
+                    }
+                `}
+            >
+                <span>{currentLabel}</span>
+                {isOpen ? (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+                        <path d="M12 10L8 6L4 10" stroke="#1E1E1E" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                ) : (
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0">
+                        <path d="M12 6L8 10L4 6" stroke="#1E1E1E" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                )}
+            </button>
+
+            {isOpen && (
+                <div className="absolute left-0 right-0 bottom-full z-50 flex flex-col">
+                    {options.map((option, index) => {
+                        const isSelected = value === option.value;
+                        const isFirst = index === 0;
+
+                        return (
+                            <button
+                                key={option.value}
+                                type="button"
+                                onClick={() => {
+                                    onChange(option.value);
+                                    onToggle('');
+                                }}
+                                className={`
+                                    flex items-center justify-between px-3 h-9 text-sm text-[#121212] whitespace-nowrap
+                                    transition-colors duration-100
+                                    bg-white border-l border-r border-t border-[#D6D6D6]
+                                    hover:bg-[#FAF7F5]
+                                    ${isFirst ? 'rounded-t-xl' : ''}
+                                `}
+                            >
+                                <span>{option.label}</span>
+                                {isSelected && (
+                                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0 ml-2">
+                                        <path d="M13.2698 3.35258C13.6273 3.61258 13.7073 4.11258 13.4473 4.47008L7.04727 13.2701C6.90977 13.4601 6.69727 13.5776 6.46227 13.5976C6.22727 13.6176 5.99977 13.5301 5.83477 13.3651L2.63477 10.1651C2.32227 9.85257 2.32227 9.34508 2.63477 9.03258C2.94727 8.72008 3.45477 8.72008 3.76727 9.03258L6.30477 11.5701L12.1548 3.52758C12.4148 3.17008 12.9148 3.09008 13.2723 3.35008L13.2698 3.35258Z" fill="#121212" />
+                                    </svg>
+                                )}
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
+        </div>
+    );
+}
+
 export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFont = null }: TabbedAddFontModalProps) {
     const isEditMode = !!editFont;
     const [activeTab, setActiveTab] = useState<Tab>('basic');
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const contentRef = useRef<HTMLDivElement>(null);
+    const [openDropdown, setOpenDropdown] = useState<string>('');
 
     const {
         register,
@@ -173,7 +270,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
     const tabs = [
         { key: 'basic' as const, label: '기본 정보' },
         { key: 'detail' as const, label: '상세 정보' },
-        { key: 'webfont' as const, label: '웹 폰트 사용' },
+        { key: 'webfont' as const, label: '웹 폰트' },
     ];
 
     return (
@@ -207,7 +304,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     key={tab.key}
                                     type="button"
                                     onClick={() => setActiveTab(tab.key)}
-                                    className={`flex-1 px-6 py-2 text-center text-sm font-sans leading-5 transition-colors ${activeTab === tab.key
+                                    className={`flex-1 px-2 sm:px-6 py-2 text-center text-sm font-sans leading-5 transition-colors whitespace-nowrap ${activeTab === tab.key
                                         ? 'border-b-2 border-primary text-primary font-semibold'
                                         : 'text-gray-500 font-normal hover:text-gray-700'
                                         }`}
@@ -308,28 +405,37 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                 <div className="flex flex-col md:flex-row gap-3">
                                     <div className="flex-1 flex flex-col gap-2">
                                         <FieldLabel label="카테고리" required />
-                                        <select {...register('category')} className={selectClass}>
-                                            {categoryOptions.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                            ))}
-                                        </select>
+                                        <CustomSelect
+                                            value={watch('category')}
+                                            onChange={(val) => setValue('category', val as FontFormData['category'])}
+                                            options={categoryOptions}
+                                            isOpen={openDropdown === 'category'}
+                                            onToggle={setOpenDropdown}
+                                            dropdownId="category"
+                                        />
                                         {errors.category && <p className="text-red-500 text-xs">{errors.category.message}</p>}
                                     </div>
                                     <div className="flex-1 flex flex-col gap-2">
                                         <FieldLabel label="파일 형식" required />
-                                        <select {...register('fontType')} className={selectClass}>
-                                            {fontTypeOptions.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                            ))}
-                                        </select>
+                                        <CustomSelect
+                                            value={watch('fontType') || 'otf_ttf'}
+                                            onChange={(val) => setValue('fontType', val as FontFormData['fontType'])}
+                                            options={fontTypeOptions}
+                                            isOpen={openDropdown === 'fontType'}
+                                            onToggle={setOpenDropdown}
+                                            dropdownId="fontType"
+                                        />
                                     </div>
                                     <div className="flex-1 flex flex-col gap-2">
                                         <FieldLabel label="라이선스" required />
-                                        <select {...register('license')} className={selectClass}>
-                                            {licenseOptions.map((opt) => (
-                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                            ))}
-                                        </select>
+                                        <CustomSelect
+                                            value={watch('license')}
+                                            onChange={(val) => setValue('license', val as FontFormData['license'])}
+                                            options={licenseOptions}
+                                            isOpen={openDropdown === 'license'}
+                                            onToggle={setOpenDropdown}
+                                            dropdownId="license"
+                                        />
                                         {errors.license && <p className="text-red-500 text-xs">{errors.license.message}</p>}
                                     </div>
                                 </div>
@@ -368,7 +474,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     <textarea
                                         {...register('description')}
                                         rows={5}
-                                        className={`${textareaClass} font-sans`}
+                                        className={`${textareaClass} font-sans leading-6`}
                                         placeholder="폰트에 대한 설명을 입력해주세요"
                                     />
                                     {errors.description && <p className="text-red-500 text-xs">{errors.description.message}</p>}
@@ -380,7 +486,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     <textarea
                                         {...register('usageNotes')}
                                         rows={5}
-                                        className={`${textareaClass} font-sans`}
+                                        className={`${textareaClass} font-sans leading-6`}
                                         placeholder="어떤 프로젝트에 사용했는지, 사용 팁 등"
                                     />
                                     {errors.usageNotes && <p className="text-red-500 text-xs">{errors.usageNotes.message}</p>}
@@ -402,7 +508,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     <textarea
                                         {...register('webFontLinkEmbed')}
                                         rows={5}
-                                        className={textareaClass}
+                                        className={webfontTextareaClass}
                                         placeholder='<link href="https://fonts.googleapis.com/..." rel="stylesheet">'
                                     />
                                 </div>
@@ -418,7 +524,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     <textarea
                                         {...register('webFontCssClass')}
                                         rows={5}
-                                        className={textareaClass}
+                                        className={webfontTextareaClass}
                                         placeholder={'.font-name {\n  font-family: "FontName", serif;\n  font-weight: 400;\n}'}
                                     />
                                 </div>
@@ -428,13 +534,13 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                     <div className="flex flex-col gap-1">
                                         <FieldLabel label="<@import>" />
                                         <span className="text-orange-400 text-xs font-normal font-sans leading-4">
-                                            Font-family: CSS class
+                                            Embed code in the &lt;head&gt; of your html
                                         </span>
                                     </div>
                                     <textarea
                                         {...register('webFontImportCode')}
                                         rows={5}
-                                        className={textareaClass}
+                                        className={webfontTextareaClass}
                                         placeholder={"@import url('https://fonts.googleapis.com/...');"}
                                     />
                                 </div>
@@ -463,7 +569,7 @@ export default function TabbedAddFontModal({ isOpen, onClose, onSuccess, editFon
                                 disabled={submitting}
                                 className="h-8 px-4 bg-primary rounded-md flex items-center justify-center hover:bg-primary-hover transition-colors disabled:opacity-50"
                             >
-                                <span className="text-white text-xs font-bold font-sans leading-4">
+                                <span className="text-white text-sm font-bold font-sans leading-4">
                                     {submitting
                                         ? (isEditMode ? '수정 중...' : '추가 중...')
                                         : (isEditMode ? '수정 완료' : '폰트 추가')

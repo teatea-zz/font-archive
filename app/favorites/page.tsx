@@ -236,17 +236,26 @@ export default function FavoritesPage() {
 
     return (
         <div
-            className="min-h-screen bg-background"
+            className="min-h-screen bg-white"
             onClick={handleBackgroundClick}
         >
             <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} onAddClick={() => setIsAddModalOpen(true)} />
 
             <FilterBar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} sortBy={sortBy} onSortChange={setSortBy} />
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                <div className="mb-6 flex items-center gap-2">
-                    <h1 className="text-2xl font-bold text-text-primary">⭐ 즐겨찾기</h1>
-                    <span className="text-text-secondary">({filteredAndSortedFonts.length})</span>
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[14px] pb-[56px]">
+                <div className="mb-4 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" className="shrink-0 flex items-center justify-center translate-y-[1px]">
+                            <path d="M9.53125 4.72188L10 5.36875L10.4688 4.72188C11.25 3.64063 12.5062 3 13.8406 3C16.1375 3 18 4.8625 18 7.15938V7.24062C18 10.7469 13.6281 14.8188 11.3469 16.5594C10.9594 16.8531 10.4844 17 10 17C9.51562 17 9.0375 16.8563 8.65312 16.5594C6.37187 14.8188 2 10.7469 2 7.24062V7.15938C2 4.8625 3.8625 3 6.15938 3C7.49375 3 8.75 3.64063 9.53125 4.72188Z" fill="#FF5429" />
+                        </svg>
+                        <h1 className="text-lg font-bold text-text-primary mr-1">즐겨찾기</h1>
+                        <p className="text-text-secondary text-sm font-medium">
+                            <span className="font-bold whitespace-pre">- </span>
+                            <span style={{ fontFamily: "'Roboto Mono', monospace" }} className="font-bold">{filteredAndSortedFonts.length}</span>개의 폰트
+                            {searchQuery && ` (검색: "${searchQuery}")`}
+                        </p>
+                    </div>
                 </div>
 
                 {filteredAndSortedFonts.length > 0 ? (
