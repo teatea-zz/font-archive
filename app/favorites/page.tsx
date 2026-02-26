@@ -13,6 +13,7 @@ import CompareBar from '@/components/comparison/CompareBar';
 import ComparisonOverlay from '@/components/modals/ComparisonOverlay';
 import Link from 'next/link';
 import Button from '@/components/ui/Button';
+import SortDropdown from '@/components/ui/SortDropdown';
 import { useCompareStore } from '@/store/compareStore';
 
 export default function FavoritesPage() {
@@ -241,7 +242,7 @@ export default function FavoritesPage() {
         >
             <Header searchQuery={searchQuery} onSearchChange={setSearchQuery} onAddClick={() => setIsAddModalOpen(true)} />
 
-            <FilterBar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} sortBy={sortBy} onSortChange={setSortBy} />
+            <FilterBar selectedCategory={selectedCategory} onCategoryChange={setSelectedCategory} />
 
             <main className="max-w-7xl mx-auto px-4 sm:px-6 pt-[14px] pb-[56px]">
                 <div className="mb-4 flex items-center justify-between">
@@ -256,6 +257,7 @@ export default function FavoritesPage() {
                             {searchQuery && ` (검색: "${searchQuery}")`}
                         </p>
                     </div>
+                    <SortDropdown sortBy={sortBy} onSortChange={setSortBy} />
                 </div>
 
                 {filteredAndSortedFonts.length > 0 ? (
