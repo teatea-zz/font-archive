@@ -126,12 +126,10 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                                         className="absolute top-[4px] right-[4px] w-5 h-5 flex items-center justify-center hover:opacity-80 transition-smooth"
                                         aria-label="이미지 삭제"
                                     >
-                                        <Image
-                                            src="/images/ComparisonOverlay/icon/close-btn-thumnail.svg"
-                                            alt="삭제"
-                                            width={20}
-                                            height={20}
-                                        />
+                                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <rect width="20" height="20" rx="10" fill="#121212" fillOpacity="0.75" />
+                                            <path d="M14 6L6 14M6 6L14 14" stroke="#FDFCFE" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
                                     </button>
                                 </>
                             ) : isUploading ? (
@@ -142,12 +140,9 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                             ) : (
                                 // 빈 슬롯 ([+] 아이콘)
                                 <div className="absolute inset-0 flex items-center justify-center text-text-secondary">
-                                    <Image
-                                        src="/images/FontDetailModal/img_add.svg"
-                                        alt="이미지 추가"
-                                        width={24}
-                                        height={24}
-                                    />
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M17.6569 12.0001H6.34315M12 6.34326V17.657" stroke="#6E6E6E" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
+                                    </svg>
                                 </div>
                             )}
                         </div>
