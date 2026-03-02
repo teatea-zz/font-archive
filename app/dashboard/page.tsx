@@ -200,16 +200,34 @@ export default function DashboardPage() {
     const filteredAndSortedFonts = useMemo(() => {
         let result = [...fonts];
 
-        // 1. 검색 필터링
+        // 검색 필터링
+        // 공통 허용 보조 문자: 숫자, 공백, ASCII 문장부호
+        const PUNCT = `0-9\\s!"#$%&'()*+,\\-./:;<=>?@[\\]^_{|}~\\\\`;
+        const LANGUAGE_FILTERS: Record<string, RegExp> = {
+            '영어': new RegExp(`^[a-zA-Z${PUNCT}]+$`),
+            '한글': /[가-힣]/,                          // 포함 일치: 한글 1자 이상이면 OK
+            '일본어': new RegExp(`^[ぁ-んァ-ン一-龥${PUNCT}]+$`),
+            '중국어': new RegExp(`^[\u4E00-\u9FFF${PUNCT}]+$`),
+        };
+
         if (searchQuery.trim()) {
-            const query = searchQuery.toLowerCase();
-            result = result.filter((font) => {
-                return (
-                    font.name.toLowerCase().includes(query) ||
-                    font.designer.toLowerCase().includes(query) ||
-                    font.tags.some((tag: string) => tag.toLowerCase().includes(query))
-                );
-            });
+            const trimmed = searchQuery.trim();
+            const langRegex = LANGUAGE_FILTERS[trimmed];
+
+            if (langRegex) {
+                // 언어 키워드 특별 필터: font.name(한국어 폰트명)에만 적용
+                result = result.filter((font) => langRegex.test(font.name));
+            } else {
+                // 일반 검색: 이름 · 디자이너 · 태그
+                const query = trimmed.toLowerCase();
+                result = result.filter((font) => {
+                    return (
+                        font.name.toLowerCase().includes(query) ||
+                        font.designer.toLowerCase().includes(query) ||
+                        font.tags.some((tag: string) => tag.toLowerCase().includes(query))
+                    );
+                });
+            }
         }
 
         // 2. 카테고리 필터링

@@ -1,0 +1,187 @@
+<div className="w-[1024px] h-[1366px] bg-neutral-100 inline-flex flex-col justify-start items-center gap-2 overflow-hidden">
+  <div className="w-[960px] flex-1 bg-color-gray-200 flex flex-col justify-center items-start">
+    <div className="self-stretch h-14 px-6 py-4 bg-white border-b border-color-gray-200 flex flex-col justify-start items-start gap-2">
+      <div className="self-stretch inline-flex justify-between items-center">
+        <div className="flex-1 flex justify-start items-center gap-2">
+          <div className="justify-center text-color-gray-900 text-lg font-semibold font-['Pretendard'] leading-7 line-clamp-1">폰트 비교</div>
+          <div className="justify-center text-color-gray-700 text-base font-normal font-['Roboto_Mono'] leading-4">3종</div>
+        </div>
+        <div data-name="Colse" data-size="24" data-types="Default" className="w-6 h-6 relative overflow-hidden">
+          <div className="w-3 h-3 left-[6px] top-[6px] absolute outline outline-[1.60px] outline-offset-[-0.80px] outline-color-gray-900" />
+        </div>
+      </div>
+    </div>
+    <div className="self-stretch flex-1 inline-flex justify-start items-start gap-px">
+      <div className="flex-1 self-stretch pb-5 bg-color-white-solid inline-flex flex-col justify-start items-start">
+        <div className="self-stretch px-6 py-5 flex flex-col justify-start items-start gap-5">
+          <div className="self-stretch flex flex-col justify-start items-start gap-6">
+            <div className="self-stretch h-64 flex flex-col justify-start items-start gap-3">
+              <img className="self-stretch flex-1 p-3 rounded-md outline outline-1 outline-offset-[-0.50px] outline-color-gray-300 inline-flex justify-center items-center gap-1.5" src="https://placehold.co/432x256" />
+            </div>
+          </div>
+          <div className="self-stretch pt-5 border-t border-color-gray-200 inline-flex justify-between items-center overflow-hidden">
+            <div className="flex-1 flex justify-start items-center gap-2">
+              <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">산하체</div>
+              <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">Diphylleia</div>
+            </div>
+            <div className="flex justify-end items-center gap-4">
+              <div className="flex justify-start items-center gap-1">
+                <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">OTF / TTF</div>
+              </div>
+              <div className="flex justify-start items-center gap-1">
+                <div className="justify-center text-color-gray-700 text-xs font-normal font-['Pretendard'] leading-4">글꼴</div>
+                <div className="flex justify-start items-center">
+                  <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">9</div>
+                  <div className="justify-center text-color-gray-700 text-xs font-normal font-['Pretendard'] leading-4">종</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="self-stretch flex flex-col justify-start items-start gap-5">
+            <div className="self-stretch inline-flex justify-start items-center gap-2">
+              <div data-type="License" className="h-4 px-1.5 bg-color-gray-900 rounded-md flex justify-center items-center">
+                <div className="text-center justify-center text-color-white-solid text-xs font-semibold font-['Pretendard'] leading-4">상업용</div>
+              </div>
+              <div data-type="Font category" className="h-5 px-1.5 bg-color-white-bg---warm rounded-md outline outline-1 outline-offset-[-1px] outline-color-orange-500 flex justify-center items-center">
+                <div className="text-center justify-center text-color-orange-600-100 text-xs font-semibold font-['Pretendard'] leading-4">디스플레이</div>
+              </div>
+            </div>
+            <div className="self-stretch flex flex-col justify-center items-start gap-6">
+              <div className="self-stretch inline-flex justify-start items-start gap-4">
+                <div className="flex-1 inline-flex flex-col justify-center items-start gap-1 overflow-hidden">
+                  <div className="justify-center text-color-gray-500 text-sm font-medium font-['Pretendard']">디자이너</div>
+                  <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">Kim Ji hyun</div>
+                </div>
+                <div className="flex-1 inline-flex flex-col justify-center items-start gap-1 overflow-hidden">
+                  <div className="justify-center text-color-gray-500 text-sm font-medium font-['Pretendard']">제작사</div>
+                  <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">Sadie-AD</div>
+                </div>
+              </div>
+            </div>
+            <div className="self-stretch inline-flex justify-start items-start gap-1 flex-wrap content-start overflow-hidden">
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#TTF</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#1종 글꼴</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#장식체</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#제목용</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#프레젠테이션</div>
+              </div>
+            </div>
+          </div>
+          <div className="self-stretch flex flex-col justify-center items-start gap-2">
+            <div className="self-stretch pt-5 border-t border-color-gray-200 flex flex-col justify-center items-start">
+              <div className="justify-center text-color-gray-500 text-base font-medium font-['Pretendard']">폰트 설명</div>
+            </div>
+            <div className="self-stretch justify-center text-color-gray-900 text-sm font-medium font-['Pretendard'] leading-6">디필레이아는 SHINee의 종현이 부른 노래 &apos;디필레이아 그레이이&apos;를 모티프로 한 서체로, 그의 감성적인 가사를 더 잘 전달하기 위해 디자인되었습니다. 이 서체는 꽃잎에 물이 닿으면 투명해져 사라진다는 노래의 애틋한 표현에서 영감을 받아, 이러한 인상들을 붓글씨 스타일의 획에 담아냈습니다. 디필레이아 그레이이는 꽃잎에 물이 닿으면 투명해지는 신비로운 꽃입니다.</div>
+          </div>
+          <div className="self-stretch flex flex-col justify-center items-start gap-2">
+            <div className="self-stretch pt-5 border-t border-color-gray-200 flex flex-col justify-center items-start">
+              <div className="justify-center text-color-gray-500 text-base font-medium font-['Pretendard']">사용 노트</div>
+            </div>
+            <div className="self-stretch justify-center text-color-gray-900 text-sm font-medium font-['Pretendard'] leading-6">디필레이아는 SHINee의 종현이 부른 노래 &apos;디필레이아 그레이이&apos;를 모티프로 한 서체로, 그의 감성적인 가사를 더 잘 전달하기 위해 디자인되었습니다. 이 서체는 꽃잎에 물이 닿으면 투명해져 사라진다는 노래의 애틋한 표현에서 영감을 받아, 이러한 인상들을 붓글씨 스타일의 획에 담아냈습니다. 디필레이아 그레이이는 꽃잎에 물이 닿으면 투명해지는 신비로운 꽃입니다.</div>
+          </div>
+          <div className="self-stretch pt-5 flex flex-col justify-start items-start gap-2">
+            <div className="self-stretch h-10 px-3 bg-color-orange-100 rounded-md inline-flex justify-center items-center">
+              <div className="inline-flex flex-col justify-start items-center">
+                <div className="text-center justify-center text-color-gray-700 text-xs font-bold font-['Roboto_Mono'] capitalize leading-4">download link</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex-1 self-stretch pb-5 bg-color-white-solid inline-flex flex-col justify-start items-start">
+        <div className="self-stretch px-6 py-5 flex flex-col justify-start items-start gap-5">
+          <div className="self-stretch flex flex-col justify-start items-start gap-6">
+            <div className="self-stretch h-64 flex flex-col justify-start items-start gap-3">
+              <img className="self-stretch flex-1 p-3 rounded-md outline outline-1 outline-offset-[-0.50px] outline-color-gray-300 inline-flex justify-center items-center gap-1.5" src="https://placehold.co/432x256" />
+            </div>
+          </div>
+          <div className="self-stretch pt-5 border-t border-color-gray-200 inline-flex justify-between items-center overflow-hidden">
+            <div className="flex-1 flex justify-start items-center gap-2">
+              <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">산하체</div>
+              <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">Diphylleia</div>
+            </div>
+            <div className="flex justify-end items-center gap-4">
+              <div className="flex justify-start items-center gap-1">
+                <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">OTF / TTF</div>
+              </div>
+              <div className="flex justify-start items-center gap-1">
+                <div className="justify-center text-color-gray-700 text-xs font-normal font-['Pretendard'] leading-4">글꼴</div>
+                <div className="flex justify-start items-center">
+                  <div className="justify-center text-color-gray-700 text-xs font-normal font-['Roboto_Mono'] leading-4">9</div>
+                  <div className="justify-center text-color-gray-700 text-xs font-normal font-['Pretendard'] leading-4">종</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="self-stretch flex flex-col justify-start items-start gap-5">
+            <div className="self-stretch inline-flex justify-start items-center gap-2">
+              <div data-type="License" className="h-4 px-1.5 bg-color-gray-900 rounded-md flex justify-center items-center">
+                <div className="text-center justify-center text-color-white-solid text-xs font-semibold font-['Pretendard'] leading-4">상업용</div>
+              </div>
+              <div data-type="Font category" className="h-5 px-1.5 bg-color-white-bg---warm rounded-md outline outline-1 outline-offset-[-1px] outline-color-orange-500 flex justify-center items-center">
+                <div className="text-center justify-center text-color-orange-600-100 text-xs font-semibold font-['Pretendard'] leading-4">디스플레이</div>
+              </div>
+            </div>
+            <div className="self-stretch flex flex-col justify-center items-start gap-6">
+              <div className="self-stretch inline-flex justify-start items-start gap-4">
+                <div className="flex-1 inline-flex flex-col justify-center items-start gap-1 overflow-hidden">
+                  <div className="justify-center text-color-gray-500 text-sm font-medium font-['Pretendard']">디자이너</div>
+                  <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">Kim Ji hyun</div>
+                </div>
+                <div className="flex-1 inline-flex flex-col justify-center items-start gap-1 overflow-hidden">
+                  <div className="justify-center text-color-gray-500 text-sm font-medium font-['Pretendard']">제작사</div>
+                  <div className="justify-center text-color-gray-900 text-base font-medium font-['Pretendard']">Sadie-AD</div>
+                </div>
+              </div>
+            </div>
+            <div className="self-stretch inline-flex justify-start items-start gap-1 flex-wrap content-start overflow-hidden">
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#TTF</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#1종 글꼴</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#장식체</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#제목용</div>
+              </div>
+              <div data-type="Tag" className="h-5 px-1.5 bg-color-white-solid rounded-md outline outline-1 outline-offset-[-1px] outline-color-gray-200 flex justify-center items-center">
+                <div className="text-center justify-center text-color-gray-500 text-xs font-medium font-['Pretendard'] leading-4">#프레젠테이션</div>
+              </div>
+            </div>
+          </div>
+          <div className="self-stretch flex flex-col justify-center items-start gap-2">
+            <div className="self-stretch pt-5 border-t border-color-gray-200 flex flex-col justify-center items-start">
+              <div className="justify-center text-color-gray-500 text-base font-medium font-['Pretendard']">폰트 설명</div>
+            </div>
+            <div className="self-stretch justify-center text-color-gray-900 text-sm font-medium font-['Pretendard'] leading-6">디필레이아는 SHINee의 종현이 부른 노래 &apos;디필레이아 그레이이&apos;를 모티프로 한 서체로, 그의 감성적인 가사를 더 잘 전달하기 위해 디자인되었습니다. 이 서체는 꽃잎에 물이 닿으면 투명해져 사라진다는 노래의 애틋한 표현에서 영감을 받아, 이러한 인상들을 붓글씨 스타일의 획에 담아냈습니다. 디필레이아 그레이이는 꽃잎에 물이 닿으면 투명해지는 신비로운 꽃입니다.</div>
+          </div>
+          <div className="self-stretch flex flex-col justify-center items-start gap-2">
+            <div className="self-stretch pt-5 border-t border-color-gray-200 flex flex-col justify-center items-start">
+              <div className="justify-center text-color-gray-500 text-base font-medium font-['Pretendard']">사용 노트</div>
+            </div>
+            <div className="self-stretch justify-center text-color-gray-900 text-sm font-medium font-['Pretendard'] leading-6">디필레이아는 SHINee의 종현이 부른 노래 &apos;디필레이아 그레이이&apos;를 모티프로 한 서체로, 그의 감성적인 가사를 더 잘 전달하기 위해 디자인되었습니다. 이 서체는 꽃잎에 물이 닿으면 투명해져 사라진다는 노래의 애틋한 표현에서 영감을 받아, 이러한 인상들을 붓글씨 스타일의 획에 담아냈습니다. 디필레이아 그레이이는 꽃잎에 물이 닿으면 투명해지는 신비로운 꽃입니다.</div>
+          </div>
+          <div className="self-stretch pt-5 flex flex-col justify-start items-start gap-2">
+            <div className="self-stretch h-10 px-3 bg-color-orange-100 rounded-md inline-flex justify-center items-center">
+              <div className="inline-flex flex-col justify-start items-center">
+                <div className="text-center justify-center text-color-gray-700 text-xs font-bold font-['Roboto_Mono'] capitalize leading-4">download link</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
