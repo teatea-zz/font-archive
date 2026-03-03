@@ -9,6 +9,7 @@ import { useCompareStore } from '@/store/compareStore';
 
 interface FontCardProps {
     font: Font;
+    priority?: boolean;           // 뷰포트 상단 카드 LCP 우선 로드
     onViewDetail?: (font: Font) => void;
     onToggleFavorite?: (fontId: string) => void;
 }
@@ -39,7 +40,7 @@ const getLicenseLabel = (license: string) => {
     return labels[license] || license;
 };
 
-export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontCardProps) {
+export default function FontCard({ font, priority = false, onViewDetail, onToggleFavorite }: FontCardProps) {
     // 다운로드 링크 우선순위: 공식 URL > 다운로드 URL
     const downloadUrl = (font.officialUrl && font.officialUrl !== '')
         ? font.officialUrl
@@ -103,6 +104,7 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
                         fill
                         className="object-cover"
                         sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                        priority={priority}
                     />
                 ) : (
                     <div className="w-full h-full flex items-center justify-center">

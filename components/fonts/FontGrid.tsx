@@ -38,10 +38,11 @@ export default function FontGrid({ fonts, onViewDetail, onToggleFavorite }: Font
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
-            {fonts.map((font) => (
+            {fonts.map((font, index) => (
                 <FontCard
                     key={font.id}
                     font={font}
+                    priority={index < 6}  // 첫 6장: 뷰포트 상단 LCP 대상
                     onViewDetail={onViewDetail}
                     onToggleFavorite={onToggleFavorite}
                 />
