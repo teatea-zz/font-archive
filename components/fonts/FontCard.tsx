@@ -146,14 +146,37 @@ export default function FontCard({ font, onViewDetail, onToggleFavorite }: FontC
                     </button>
                 </div>
 
-                {/* 텍스트 영역: 폰트명 + 디자이너 */}
+                {/* 텍스트 영역: 폰트명 + 디자이너 + 파일형식/글꼴 종수 */}
                 <div className="flex flex-col gap-0.5">
                     <h3 className="font-semibold text-2xl leading-7 text-[#1E1E1E] truncate">
                         {font.name}
                     </h3>
-                    <p className="text-xs font-medium leading-6 text-gray-500 truncate">
-                        {font.designer}
-                    </p>
+                    {/* 디자이너(좌) + 파일형식·글꼴종수(우) */}
+                    <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium leading-6 text-gray-500 truncate min-w-0">
+                            {font.designer}
+                        </p>
+                        <div className="flex items-center gap-2 shrink-0">
+                            {font.fontType && (() => {
+                                const labels: Record<string, string> = {
+                                    'otf_ttf': 'OTF / TTF', 'otf': 'OTF', 'ttf': 'TTF'
+                                };
+                                const label = labels[font.fontType] || font.fontType;
+                                return (
+                                    <span className="text-gray-500 text-xs font-normal font-mono leading-4">
+                                        {label}
+                                    </span>
+                                );
+                            })()}
+                            {font.weightCount && (
+                                <div className="flex items-center">
+                                    <span className="text-gray-500 text-xs font-normal font-sans leading-4">글꼴</span>
+                                    <span className="text-gray-500 text-xs font-normal font-mono leading-4">{font.weightCount}</span>
+                                    <span className="text-gray-500 text-xs font-normal font-sans leading-4">종</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* 태그 뱃지 — 2줄까지 표시 (max-h: 2행 × 24px + gap 4px = 52px), 넘치면 숨김 */}

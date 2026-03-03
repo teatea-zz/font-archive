@@ -12,6 +12,7 @@ interface MultiImageUploadProps {
 export default function MultiImageUpload({ images, onImagesChange, maxImages = 5 }: MultiImageUploadProps) {
     const [uploading, setUploading] = useState<number | null>(null); // 업로드 중인 슬롯 인덱스
     const [error, setError] = useState<string | null>(null);
+    const [dragOverSlot, setDragOverSlot] = useState<number | null>(null); // 드래그 중인 슬롯
     const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
     const handleFileChange = async (file: File, slotIndex: number) => {
@@ -74,13 +75,63 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
         }
     };
 
-    const handleRemoveImage = (indexToRemove: number) => {
+    // Supabase Storage에 업로드된 URL 여부 판별
+    const isSupabaseUrl = (url: string) =>
+        url.includes('supabase.co') || url.includes('supabase.in');
+
+    const handleRemoveImage = async (indexToRemove: number) => {
+        const urlToRemove = images[indexToRemove];
+
+        // UI에서 먼저 즉시 제거 (UX 우선)
         const newImages = images.filter((_, index) => index !== indexToRemove);
         onImagesChange(newImages);
+
+        // Supabase에 업로드된 이미지일 경우에만 Storage에서도 삭제
+        if (urlToRemove && isSupabaseUrl(urlToRemove)) {
+            try {
+                const response = await fetch('/api/upload', {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: urlToRemove }),
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    console.error('🗑️ Storage 삭제 실패:', data.error);
+                } else {
+                    console.log('🗑️ Storage 삭제 성공:', urlToRemove);
+                }
+            } catch (err) {
+                console.error('🗑️ Storage 삭제 요청 오류:', err);
+            }
+        }
     };
 
     const handleSlotClick = (index: number) => {
         fileInputRefs.current[index]?.click();
+    };
+
+    // 드래그앤드롭 핸들러
+    const handleDragOver = (e: React.DragEvent, slotIndex: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (uploading === null) setDragOverSlot(slotIndex);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverSlot(null);
+    };
+
+    const handleDrop = (e: React.DragEvent, slotIndex: number) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setDragOverSlot(null);
+
+        if (uploading !== null) return; // 다른 슬롯 업로드 중이면 무시
+
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileChange(file, slotIndex);
     };
 
     // 5개 슬롯 배열 생성
@@ -93,11 +144,20 @@ export default function MultiImageUpload({ images, onImagesChange, maxImages = 5
                     const imageUrl = images[slotIndex];
                     const isUploading = uploading === slotIndex;
 
+                    const isDragOver = dragOverSlot === slotIndex;
+
                     return (
                         <div
                             key={slotIndex}
-                            className="relative aspect-square border-2 border-dashed border-border rounded-lg overflow-hidden hover:border-primary transition-smooth cursor-pointer bg-background-secondary"
+                            className={`relative aspect-square border-2 border-dashed rounded-lg overflow-hidden transition-smooth cursor-pointer bg-background-secondary ${isDragOver
+                                    ? 'border-primary bg-primary/5 scale-[1.03]'
+                                    : 'border-border hover:border-primary'
+                                }`}
                             onClick={() => !imageUrl && handleSlotClick(slotIndex)}
+                            onDragOver={(e) => handleDragOver(e, slotIndex)}
+                            onDragEnter={(e) => handleDragOver(e, slotIndex)}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, slotIndex)}
                         >
                             <input
                                 ref={(el) => { fileInputRefs.current[slotIndex] = el; }}

@@ -49,8 +49,8 @@ const config: Config = {
                 },
             },
             fontFamily: {
-                sans: ['Pretendard', '-apple-system', 'sans-serif'],
-                mono: ['Roboto Mono', 'monospace'],
+                sans: ['var(--font-pretendard)', '-apple-system', 'sans-serif'],
+                mono: ['var(--font-roboto-mono)', 'monospace'],
             },
             spacing: {
                 'safe': 'max(1rem, env(safe-area-inset-bottom))',

@@ -17,7 +17,7 @@ export default function CompareBar({ onOpenOverlay }: CompareBarProps) {
     return (
         <div className={`fixed bottom-0 left-0 right-0 z-[100] transition-transform duration-300 ease-in-out transform ${count > 0 ? 'translate-y-0' : 'translate-y-full'} pointer-events-none`}>
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-4 pt-2 flex justify-center">
-                <div className="bg-white rounded-xl shadow-lg border border-border p-4 flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto min-w-[300px] animate-slide-up pointer-events-auto">
+                <div className="bg-white rounded-xl shadow-lg border border-border p-4 flex flex-col sm:flex-row items-center gap-2 sm:gap-4 w-full sm:w-auto min-w-[300px] animate-slide-up pointer-events-auto">
 
                     {/* 선택된 폰트칩 */}
                     <div className="flex gap-2 overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0 scrollbar-hide">
@@ -48,7 +48,7 @@ export default function CompareBar({ onOpenOverlay }: CompareBarProps) {
                     <Button
                         onClick={onOpenOverlay}
                         disabled={count < 2}
-                        className="w-full sm:w-auto whitespace-nowrap"
+                        className="w-full sm:w-auto whitespace-nowrap rounded-xl sm:rounded-lg"
                     >
                         비교하기 ({count})
                     </Button>

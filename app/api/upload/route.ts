@@ -70,3 +70,57 @@ export async function POST(request: Request) {
         );
     }
 }
+
+/**
+ * DELETE /api/upload
+ * Supabase Storage에서 이미지 삭제
+ * Body: { url: string } — 삭제할 이미지의 Public URL
+ */
+export async function DELETE(request: Request) {
+    try {
+        // 세션 검증
+        const cookieStore = await cookies();
+        const authSession = cookieStore.get('auth-session');
+        if (!authSession || !(await verifyAuthToken(authSession.value))) {
+            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const { url } = await request.json();
+
+        if (!url || typeof url !== 'string') {
+            return NextResponse.json({ error: 'URL이 제공되지 않았습니다' }, { status: 400 });
+        }
+
+        // Public URL에서 Storage path(filename) 추출
+        // 예: https://xxx.supabase.co/storage/v1/object/public/font-images/1234567890-image.webp
+        //     → 1234567890-image.webp
+        const bucketName = 'font-images';
+        const marker = `/object/public/${bucketName}/`;
+        const markerIndex = url.indexOf(marker);
+
+        if (markerIndex === -1) {
+            return NextResponse.json({ error: '유효하지 않은 Supabase Storage URL입니다' }, { status: 400 });
+        }
+
+        const filePath = decodeURIComponent(url.substring(markerIndex + marker.length));
+
+        // Supabase Storage에서 파일 삭제
+        const { error } = await supabaseAdmin.storage
+            .from(bucketName)
+            .remove([filePath]);
+
+        if (error) {
+            console.error('❌ 이미지 삭제 실패:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        console.log('🗑️ 이미지 삭제 성공:', filePath);
+        return NextResponse.json({ success: true, filePath });
+    } catch (error) {
+        console.error('API 에러:', error);
+        return NextResponse.json(
+            { error: 'Internal server error' },
+            { status: 500 }
+        );
+    }
+}
