@@ -32,6 +32,7 @@ const robotoMono = Roboto_Mono({
     subsets: ["latin"],
     display: "swap",
     variable: "--font-roboto-mono",
+    preload: false,  // 코드블록/버튼 전용 → 초기 프리로드 불필요
 });
 
 export const metadata: Metadata = {

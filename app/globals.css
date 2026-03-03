@@ -1,44 +1,5 @@
-/* Roboto Mono (tokens.json: font.family.mono) */
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+/* Roboto Mono, Pretendard: next/font (layout.tsx)로 처리 — CDN 코드 제거 완료 */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-/* Pretendard 폰트 로드 */
-@layer base {
-  @font-face {
-    font-family: 'Pretendard';
-    font-weight: 400;
-    font-style: normal;
-    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Pretendard';
-    font-weight: 500;
-    font-style: normal;
-    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Medium.woff') format('woff');
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Pretendard';
-    font-weight: 600;
-    font-style: normal;
-    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-SemiBold.woff') format('woff');
-    font-display: swap;
-  }
-
-  @font-face {
-    font-family: 'Pretendard';
-    font-weight: 700;
-    font-style: normal;
-    src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Bold.woff') format('woff');
-    font-display: swap;
-  }
-}
 
 /* 전역 폰트 렌더링 — 전체에 antialiased 적용 */
 @layer base {

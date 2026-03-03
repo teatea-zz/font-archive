@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    compress: true, // gzip 압축 활성화
+    experimental: {
+        optimizePackageImports: [
+            'react-hook-form',
+            'zod',
+            '@hookform/resolvers',
+        ],
+    },
     async headers() {
         return [
             {

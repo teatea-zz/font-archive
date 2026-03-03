@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState, useMemo, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import { Font, SortBy } from '@/types/font';
 import Header from '@/components/layout/Header';
 import FilterBar from '@/components/layout/FilterBar';
 import FontGrid from '@/components/fonts/FontGrid';
-import TabbedAddFontModal from '@/components/modals/TabbedAddFontModal';
-import FontDetailModal from '@/components/modals/FontDetailModal';
-import ConfirmDialog from '@/components/modals/ConfirmDialog';
 import FloatingAddButton from '@/components/ui/FloatingAddButton';
 import SortDropdown from '@/components/ui/SortDropdown';
 import CompareBar from '@/components/comparison/CompareBar';
-import ComparisonOverlay from '@/components/modals/ComparisonOverlay';
 import { useCompareStore } from '@/store/compareStore';
+
+// 모달: 초기 번들 제외 → 실제 열릴 때 로드 (unused JS 감소)
+const TabbedAddFontModal = dynamic(() => import('@/components/modals/TabbedAddFontModal'), { ssr: false });
+const FontDetailModal = dynamic(() => import('@/components/modals/FontDetailModal'), { ssr: false });
+const ConfirmDialog = dynamic(() => import('@/components/modals/ConfirmDialog'), { ssr: false });
+const ComparisonOverlay = dynamic(() => import('@/components/modals/ComparisonOverlay'), { ssr: false });
 
 export default function DashboardPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);

@@ -42,7 +42,7 @@ export default function FontGrid({ fonts, onViewDetail, onToggleFavorite }: Font
                 <FontCard
                     key={font.id}
                     font={font}
-                    priority={index < 6}  // 첫 6장: 뷰포트 상단 LCP 대상
+                    priority={index < 3}  // 첫 3장: 데스크탑 1행(3열) = 뷰포트 내 LCP 대상
                     onViewDetail={onViewDetail}
                     onToggleFavorite={onToggleFavorite}
                 />
