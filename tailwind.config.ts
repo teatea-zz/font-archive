@@ -49,7 +49,7 @@ const config: Config = {
                 },
             },
             fontFamily: {
-                sans: ['var(--font-pretendard)', '-apple-system', 'sans-serif'],
+                sans: ['Pretendard', '-apple-system', 'sans-serif'],
                 mono: ['var(--font-roboto-mono)', 'monospace'],
             },
             spacing: {
