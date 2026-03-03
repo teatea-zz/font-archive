@@ -4,6 +4,6 @@
 
 Tech Stack: Next.js, Supabase, Tailwind CSS.
 
-**버전**: v2.6 (Phase 5 완료)  
+**버전**: v2.7 (Phase 5 완료)  
 **마지막 업데이트**: 2026-03-03  
-**Phase 5 업데이트**: LCP 이미지 우선순위 상향 조정 및 폰트 프리로드 최적화
+**Phase 5 업데이트**: 대시보드 성능 최적화 (Lighthouse 개선)
